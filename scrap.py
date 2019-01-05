@@ -67,6 +67,11 @@ def get_paste(paste_id):
     return None #we get here if any kind of error occurred
 
 def search_paste(paste):
+    for regex in searches.keys():
+        matches = re.match(regex, paste)
+        if matches:
+            #yay we found a match!
+
     return None
 
 def send_results(results):
