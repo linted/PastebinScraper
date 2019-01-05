@@ -78,9 +78,6 @@ def search_paste(paste):
     if found:
         return (" ".join(title),paste)
     return None
-            
-
-    return None
 
 def send_results(results):
     pass
