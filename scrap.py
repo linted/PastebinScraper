@@ -67,10 +67,18 @@ def get_paste(paste_id):
     return None #we get here if any kind of error occurred
 
 def search_paste(paste):
+    title = []
+    found = False
     for regex in searches.keys():
         matches = re.match(regex, paste)
         if matches:
-            #yay we found a match!
+            #yay we found a match! as of now we don't actually use any of the matched stuff
+            title.append(searches[regex]) #adds the match description to the title
+            found = True
+    if found:
+        return (" ".join(title),paste)
+    return None
+            
 
     return None
 
