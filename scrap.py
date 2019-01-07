@@ -18,7 +18,7 @@ searches = {
 }
 
 pastebin_listing_url = "https://scrape.pastebin.com/api_scraping.php"
-pastebin_listing_params = {"limit":"100"}
+pastebin_listing_params = {"limit":"20"}
 pastebin_scrape_url = "https://scrape.pastebin.com/api_scrape_item.php?i={}"
 
 email = '''\
@@ -28,17 +28,20 @@ link = https://pastebin.com/{id}
 {body}
 '''
 
+password = None
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--send-email", help="email to send from", required=True)
     parser.add_argument("-r", "--recv-email", help="email to send to", required=True)
     parser.add_argument("-s", "--smtp-server", help="smtp server to talk to", required=True)
     args = parser.parse_args()
+
+    global password
     password = getpass.getpass()
 
     try:
         server = setup_email(args.send_email, password, args.smtp_server)
-        del password
     except Exception as e:
         print("Error during smtp setup [{}]: {}".format(type(e), e))
         return
@@ -63,9 +66,12 @@ def get_updates():
     ret = set()
     listing = requests.get(url=pastebin_listing_url, params=pastebin_listing_params)
     if listing.status_code == 200:
-        pastes = json.loads(listing.text)
-        for items in pastes:
-            ret.add(items["key"])
+        try:
+            pastes = json.loads(listing.text)
+            for items in pastes:
+                ret.add(items["key"])
+        except Exception as e:
+            print("Error while decoding json") #yeah this falls through and we request all of the only things again
     else:
         raise ConnectionError("Status code: {}".format(listing.status_code))
     return ret
@@ -112,6 +118,9 @@ def send_results(results, connection_info):
     except smtplib.SMTPDataError as e:
         print("Error while sending{}: {}\n send_email = {}\n recv_email = {}".format(type(e), e, connection_info["send_email"], connection_info["recv_email"]))
         print("message = {}\n-------".format(current_message))
+    except smtplib.SMTPServerDisconnected:
+        print("Reconnecting to SMTP server")
+        connection_info['server'].login(connection_info["send_email"], password)
 
 def setup_email(email, password, server):
     context = ssl.create_default_context()
