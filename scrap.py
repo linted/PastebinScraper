@@ -53,11 +53,11 @@ def main():
         current_listing = get_updates() # slow operation, but it has to be done
         new_elements = current_listing - old_listing
         old_listing = current_listing
-        print("New entries: {}".format(len(new_elements)))
+        print("New entries: {}".format(len(new_elements)), flush=True)
         for item in new_elements:
             new_thread = threading.Thread(target=parse_paste, args=(item, {"server":server, "send_email":args.send_email, "recv_email":args.recv_email}), daemon=True)
             new_thread.start()
-
+        
         time.sleep(10) #sleep for a second no matter what. pastes come in slow most of the time
     
     shutdown_email(server)
