@@ -38,8 +38,9 @@ def main():
 
     try:
         server = setup_email(args.send_email, password, args.smtp_server)
-    except:
-        print("Error during smtp setup")
+        del password
+    except Exception as e:
+        print("Error during smtp setup [{}]: {}".format(type(e), e))
         return
 
     old_listing = set()
