@@ -6,6 +6,7 @@ import json
 import re
 import smtplib
 import ssl
+import sys
 import threading
 import time
 
@@ -54,6 +55,7 @@ def main():
         new_elements = current_listing - old_listing
         old_listing = current_listing
         print("New entries: {}".format(len(new_elements)), flush=True)
+        sys.stdout.flush()
         for item in new_elements:
             new_thread = threading.Thread(target=parse_paste, args=(item, {"server":server, "send_email":args.send_email, "recv_email":args.recv_email}), daemon=True)
             new_thread.start()
