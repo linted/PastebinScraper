@@ -1,5 +1,7 @@
 #!/ur/bin/env python3
+import argparse
 import collections
+import getpass
 import json
 import re
 import smtplib
@@ -7,8 +9,6 @@ import ssl
 import threading
 import time
 
-import googleapiclient
-import oauth2client
 import requests
 
 searches = {
@@ -23,6 +23,12 @@ pastebin_scrape_url = "https://scrape.pastebin.com/api_scrape_item.php?i={}"
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--send-email", help="email to send from", required=True)
+    parser.add_argument("-r", "--recv-email", help="email to send to", required=True)
+    parser.add_argument("-s", "--smtp-server", help="smtp server to talk to", required=True)
+    password = getpass.getpass()
+
     old_listing = set()
     current_listing = set()
     new_elements = set()
@@ -83,6 +89,13 @@ def search_paste(paste):
 
 def send_results(results):
     pass
+
+def setup_email(email, password):
+    context = ssl.create_default_context()
+    server =  smtplib.SMTP(smtp_server, port)
+    server.starttls(context=context)
+    server.login(sender_email, password)
+    server.sendmail(sender_email, receiver_email, message)
 
 if __name__ == "__main__":
     main()
