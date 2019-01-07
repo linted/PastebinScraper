@@ -49,12 +49,12 @@ def main():
         current_listing = get_updates() # slow operation, but it has to be done
         new_elements = current_listing - old_listing
         old_listing = current_listing
-
+        print("New entries: {}".format(len(new_elements)))
         for item in new_elements:
-            new_thread = threading.Thread(target=parse_paste, args=(item, {"server":server, "send_email":args.send_email, "recv_email":args.recv_email)), daemon=True)
+            new_thread = threading.Thread(target=parse_paste, args=(item, {"server":server, "send_email":args.send_email, "recv_email":args.recv_email}), daemon=True)
             new_thread.start()
 
-        time.sleep(1) #sleep for a second no matter what. pastes come in slow most of the time
+        time.sleep(10) #sleep for a second no matter what. pastes come in slow most of the time
     
     shutdown_email(server)
 
@@ -100,12 +100,17 @@ def search_paste(paste):
             title.append(searches[regex]) #adds the match description to the title
             found = True
     if found:
-        return {"title":" ".join(title), "body":paste)
+        return {"title":" ".join(title), "body":paste}
     return None
 
 def send_results(results, connection_info):
-    current_message = email.format(title=results["title"], "id" = results["id"], "body"=results["body"])
-    connection_info["server"].sendmail(connection_info["send_email"], connection_info["recv_email"], current_message)
+    current_message = email.format(title=results["title"], id= results["id"], body=results["body"])
+    try:
+        connection_info["server"].sendmail(connection_info["send_email"], connection_info["recv_email"], current_message)
+        print("Sent email")
+    except smtplib.SMTPDataError as e:
+        print("Error while sending{}: {}\n send_email = {}\n recv_email = {}".format(type(e), e, connection_info["send_email"], connection_info["recv_email"]))
+        print("message = {}\n-------".format(current_message))
 
 def setup_email(email, password, server):
     context = ssl.create_default_context()
