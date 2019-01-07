@@ -21,13 +21,26 @@ pastebin_listing_url = "https://scrape.pastebin.com/api_scraping.php"
 pastebin_listing_params = {"limit":"100"}
 pastebin_scrape_url = "https://scrape.pastebin.com/api_scrape_item.php?i={}"
 
+email = '''\
+Subject: {title}
+
+link = https://pastebin.com/{id}
+{body}
+'''
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--send-email", help="email to send from", required=True)
     parser.add_argument("-r", "--recv-email", help="email to send to", required=True)
     parser.add_argument("-s", "--smtp-server", help="smtp server to talk to", required=True)
+    args = parser.parse_args()
     password = getpass.getpass()
+
+    try:
+        server = setup_email(args.send_email, password, args.smtp_server)
+    except:
+        print("Error during smtp setup")
+        return
 
     old_listing = set()
     current_listing = set()
@@ -38,10 +51,12 @@ def main():
         old_listing = current_listing
 
         for item in new_elements:
-            new_thread = threading.Thread(target=parse_paste, args=(item,), daemon=True)
+            new_thread = threading.Thread(target=parse_paste, args=(item, {"server":server, "send_email":args.send_email, "recv_email":args.recv_email)), daemon=True)
             new_thread.start()
 
         time.sleep(1) #sleep for a second no matter what. pastes come in slow most of the time
+    
+    shutdown_email(server)
 
 def get_updates():
     ret = set()
@@ -54,14 +69,15 @@ def get_updates():
         raise ConnectionError("Status code: {}".format(listing.status_code))
     return ret
 
-def parse_paste(paste_id):
+def parse_paste(paste_id, connection_info):
     paste = get_paste(paste_id)
     if not paste:
         print("[-] Error: Unable to retrieve paste {}".format(paste_id))
         return None #currently we just fail if we have a problem when trying to get a paste
     results = search_paste(paste)
     if results:
-        send_results(results)
+        results.update({"id":paste_id})
+        send_results(results, connection_info)
 
     return None
 
@@ -84,18 +100,22 @@ def search_paste(paste):
             title.append(searches[regex]) #adds the match description to the title
             found = True
     if found:
-        return (" ".join(title),paste)
+        return {"title":" ".join(title), "body":paste)
     return None
 
-def send_results(results):
-    pass
+def send_results(results, connection_info):
+    current_message = email.format(title=results["title"], "id" = results["id"], "body"=results["body"])
+    connection_info["server"].sendmail(connection_info["send_email"], connection_info["recv_email"], current_message)
 
-def setup_email(email, password):
+def setup_email(email, password, server):
     context = ssl.create_default_context()
-    server =  smtplib.SMTP(smtp_server, port)
+    server = smtplib.SMTP(server, 587)
     server.starttls(context=context)
-    server.login(sender_email, password)
-    server.sendmail(sender_email, receiver_email, message)
+    server.login(email, password)
+    return server
+    
+def shutdown_email(server):
+    server.close()
 
 if __name__ == "__main__":
     main()
