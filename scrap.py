@@ -19,7 +19,7 @@ searches = {
 }
 
 pastebin_listing_url = "https://scrape.pastebin.com/api_scraping.php"
-pastebin_listing_params = {"limit":"20"}
+pastebin_listing_params = {"limit":"30"}
 pastebin_scrape_url = "https://scrape.pastebin.com/api_scrape_item.php?i={}"
 
 email = '''\
