@@ -29,6 +29,7 @@ link = https://pastebin.com/{id}
 {body}
 '''
 
+GLOBAL_MUTEX = threading.Lock()
 password = None
 
 def main():
@@ -114,6 +115,7 @@ def search_paste(paste):
 
 def send_results(results, connection_info):
     current_message = email.format(title=results["title"], id= results["id"], body=results["body"])
+    GLOBAL_MUTEX.acquire()
     try:
         connection_info["server"].sendmail(connection_info["send_email"], connection_info["recv_email"], current_message)
         print("Sent email")
@@ -123,6 +125,7 @@ def send_results(results, connection_info):
     except smtplib.SMTPServerDisconnected:
         print("Reconnecting to SMTP server")
         connection_info['server'].login(connection_info["send_email"], password)
+    GLOBAL_MUTEX.release()
 
 def setup_email(email, password, server):
     context = ssl.create_default_context()
