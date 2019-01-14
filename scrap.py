@@ -116,15 +116,19 @@ def search_paste(paste):
 def send_results(results, connection_info):
     current_message = email.format(title=results["title"], id= results["id"], body=results["body"])
     GLOBAL_MUTEX.acquire()
-    try:
-        connection_info["server"].sendmail(connection_info["send_email"], connection_info["recv_email"], current_message)
-        print("Sent email")
-    except smtplib.SMTPDataError as e:
-        print("Error while sending{}: {}\n send_email = {}\n recv_email = {}".format(type(e), e, connection_info["send_email"], connection_info["recv_email"]))
-        print("message = {}\n-------".format(current_message))
-    except smtplib.SMTPServerDisconnected:
-        print("Reconnecting to SMTP server")
-        connection_info['server'].login(connection_info["send_email"], password)
+    retry = 1
+    while (retry):
+        try:
+            connection_info["server"].sendmail(connection_info["send_email"], connection_info["recv_email"], current_message)
+            print("Sent email")
+            retry = 0
+        except smtplib.SMTPDataError as e:
+            print("Error while sending{}: {}\n send_email = {}\n recv_email = {}".format(type(e), e, connection_info["send_email"], connection_info["recv_email"]))
+            print("message = {}\n-------".format(current_message))
+        except smtplib.SMTPResponseException:
+            print("Reconnecting to SMTP server")
+            connection_info['server'].starttls(context=ssl.create_default_context())
+            connection_info['server'].login(connection_info['send_email'],password)
     GLOBAL_MUTEX.release()
 
 def setup_email(email, password, server):
