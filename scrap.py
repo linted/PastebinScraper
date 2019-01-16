@@ -31,6 +31,7 @@ link = https://pastebin.com/{id}
 
 GLOBAL_MUTEX = threading.Lock()
 password = None
+smtp_server = None
 
 def main():
     parser = argparse.ArgumentParser()
@@ -58,7 +59,7 @@ def main():
         print("New entries: {}".format(len(new_elements)), flush=True)
         sys.stdout.flush()
         for item in new_elements:
-            new_thread = threading.Thread(target=parse_paste, args=(item, {"server":server, "send_email":args.send_email, "recv_email":args.recv_email}), daemon=True)
+            new_thread = threading.Thread(target=parse_paste, args=(item, {"server":args.smtp_server, "send_email":args.send_email, "recv_email":args.recv_email}), daemon=True)
             new_thread.start()
         
         time.sleep(10) #sleep for a second no matter what. pastes come in slow most of the time
@@ -119,7 +120,7 @@ def send_results(results, connection_info):
     retry = 1
     while (retry):
         try:
-            connection_info["server"].sendmail(connection_info["send_email"], connection_info["recv_email"], current_message)
+            smtp_server.sendmail(connection_info["send_email"], connection_info["recv_email"], current_message)
             print("Sent email")
             retry = 0
         except smtplib.SMTPDataError as e:
@@ -127,11 +128,12 @@ def send_results(results, connection_info):
             print("message = {}\n-------".format(current_message))
         except smtplib.SMTPResponseException:
             print("Reconnecting to SMTP server")
-            connection_info['server'].starttls(context=ssl.create_default_context())
-            connection_info['server'].login(connection_info['send_email'],password)
+            setup_email(connection_info["send_email"], password, connection_info["server"])
+
     GLOBAL_MUTEX.release()
 
 def setup_email(email, password, server):
+    global server
     context = ssl.create_default_context()
     server = smtplib.SMTP(server, 587)
     server.starttls(context=context)
