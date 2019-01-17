@@ -77,7 +77,8 @@ def get_updates():
         except Exception as e:
             print("Error while decoding json") #yeah this falls through and we request all of the only things again
     else:
-        raise ConnectionError("Status code: {}".format(listing.status_code))
+        print("Error: HTTP returned status code: {}".format(listing.status_code))
+        
     return ret
 
 def parse_paste(paste_id, connection_info):
@@ -133,11 +134,11 @@ def send_results(results, connection_info):
     GLOBAL_MUTEX.release()
 
 def setup_email(email, password, server):
-    global server
+    global smtp_server
     context = ssl.create_default_context()
-    server = smtplib.SMTP(server, 587)
-    server.starttls(context=context)
-    server.login(email, password)
+    smtp_server = smtplib.SMTP(server, 587)
+    smtp_server.starttls(context=context)
+    smtp_server.login(email, password)
     return server
     
 def shutdown_email(server):
