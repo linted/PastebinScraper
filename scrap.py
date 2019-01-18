@@ -16,7 +16,7 @@ searches = {
     r"[\s:]*([0-9a-zA-Z]{64})[\s]*": "btc private key",
     r"[\s:]*([0-9a-zA-Z]{32})[\s]*": "btc address",
     r"[\s:]*([59][0-9a-zA-Z]{50})[\s]*": "Base58 Wallet Import format",
-    r"\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,64})\b": "email address"
+    r"\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Z]{2,64})\b": "email address"
 }
 
 pastebin_listing_url = "https://scrape.pastebin.com/api_scraping.php"
