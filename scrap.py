@@ -13,9 +13,9 @@ import time
 import requests
 
 searches = {
-    r"[\s:]*([0-9a-zA-Z]{64})[\s]*": "btc private key",
-    r"[\s:]*([0-9a-zA-Z]{32})[\s]*": "btc address",
-    r"[\s:]*([59][0-9a-zA-Z]{50})[\s]*": "Base58 Wallet Import format",
+    r"\b[\s:]*([0-9a-zA-Z]{64})\b": "btc private key",
+    r"\b[\s:]*([0-9a-zA-Z]{32})\b": "btc address",
+    r"\b[\s:]*([59][0-9a-zA-Z]{50})\b": "Base58 Wallet Import format",
     r"\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Z]{2,64})\b": "email address"
 }
 
