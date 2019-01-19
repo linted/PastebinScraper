@@ -13,10 +13,10 @@ import time
 import requests
 
 searches = {
-    r"[\b\s:]([0-9a-zA-Z]{64})[\b\s:]": "btc private key",
-    r"[\b\s:]([0-9a-zA-Z]{34})[\b\s:]": "btc address",
-    r"[\b\s:]([59][0-9a-zA-Z]{50})[\b\s:]": "Base58 Wallet Import format",
-    r"[\b\s:]([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Z]{2,64})[\b\s:]": "email address"
+    r"[\b\s:]*([0-9a-zA-Z]{64})[\b\s:]*": "btc private key",
+    r"[\b\s:]*([0-9a-zA-Z]{34})[\b\s:]*": "btc address",
+    r"[\b\s:]*([59][0-9a-zA-Z]{50})[\b\s:]*": "Base58 Wallet Import format",
+    r"[\b\s:]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Z]{2,64})[\b\s:]*": "email address"
 }
 
 pastebin_listing_url = "https://scrape.pastebin.com/api_scraping.php"
