@@ -1,4 +1,4 @@
-
+require 'thread'
 
 class Listing
     require 'net/http'
@@ -45,8 +45,11 @@ class Scraper
 
     public
     def get_paste
-        HTTP.get_response(@url)
+        @contents = HTTP.get_response(@url)
     end
+
+    public 
+    def 
 end
 
 class Send
@@ -55,6 +58,7 @@ class Send
         @message = message
     end
 
+    public
     def send
         post_paste
     end
@@ -89,4 +93,25 @@ END_OF_MESSAGE
     end
 end
 
+def get_and_send id, con
+    message = Scraper.new(x).get_paste.filter
+    Email.new(id, message, con["server"], con["src_email"], con["dst_email"], con["password"]).send if message.is_a? HTTPSuccess
+end
+
 def main
+    #parse args here
+    connection_info = {
+        server: nil,
+        src_email: nil
+        dst_email: nil
+        password: nil
+    }
+    pastes = Listing.new
+    
+    loop do
+        threads = []
+        pastes.get_new_listings.each {|x| threads << Thread.new {get_and_send(x, connection_info)} }
+        sleep(10)
+        threads.each {|x| x.join()}
+    end
+end
