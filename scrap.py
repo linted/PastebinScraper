@@ -66,10 +66,9 @@ def main():
             thread_list.append(new_thread)
         
         time.sleep(10) #sleep for a second no matter what. pastes come in slow most of the time
-        count = 1
-        print("joining threads ", end=None)
-        for thread in thread_list:
-            print(count, ", ", end=None)
+        print("joining threads ", end="")
+        for (thread,count) in zip(thread_list, range(1,len(thread_list)+1)):
+            print(count, ", ", end="")
             thread.join()
         print("done")
     
