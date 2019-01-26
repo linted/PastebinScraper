@@ -63,12 +63,13 @@ def main():
         for item in new_elements:
             new_thread = threading.Thread(target=parse_paste, args=(item, {"server":args.smtp_server, "send_email":args.send_email, "recv_email":args.recv_email}))
             new_thread.start()
+            thread_list.append(new_thread)
         
         time.sleep(10) #sleep for a second no matter what. pastes come in slow most of the time
         count = 1
-        print("joining threads ")
+        print("joining threads ", end=None)
         for thread in thread_list:
-            print(count, ", ")
+            print(count, ", ", end=None)
             thread.join()
         print("done")
     
