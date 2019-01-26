@@ -59,11 +59,19 @@ def main():
         old_listing = current_listing
         print("New entries: {}".format(len(new_elements)), flush=True)
         sys.stdout.flush()
+        thread_list = []
         for item in new_elements:
-            new_thread = threading.Thread(target=parse_paste, args=(item, {"server":args.smtp_server, "send_email":args.send_email, "recv_email":args.recv_email}), daemon=True)
+            new_thread = threading.Thread(target=parse_paste, args=(item, {"server":args.smtp_server, "send_email":args.send_email, "recv_email":args.recv_email}))
             new_thread.start()
         
         time.sleep(10) #sleep for a second no matter what. pastes come in slow most of the time
+        count = 1
+        print("joining threads ")
+        for thread in thread_list:
+            print(count, ", ")
+            thread.join()
+        finally:
+            print("done")
     
     shutdown_email(server)
 
