@@ -70,8 +70,7 @@ def main():
         for thread in thread_list:
             print(count, ", ")
             thread.join()
-        finally:
-            print("done")
+        print("done")
     
     shutdown_email(server)
 
