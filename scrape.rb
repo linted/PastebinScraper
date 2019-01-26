@@ -1,4 +1,6 @@
 require 'thread'
+require 'optparse'
+require 'io/console'
 
 class Listing
     require 'net/http'
@@ -106,6 +108,14 @@ def main
         dst_email: nil
         password: nil
     }
+    OptionParser.new do |opts|
+        opts.on :required, "-eEMAIL", "--send-email EMAIL", "Email to send from" {|x| connection_info[:src_email] = x}
+        opts.on :required, "-rEMAIL", "--recv-email EMAIL", "Email to send to" {|x| connection_info[:dst_email] = x}
+        opts.on :required, "-sSERVER", "--smtp-server SERVER", "Smtp server to talk to" {|x| connection_info[:server] = x}
+    end.parse!
+
+    connection_info[:password] = STDIN.noecho(&:gets).chomp
+
     pastes = Listing.new
     
     loop do
