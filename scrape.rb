@@ -1,3 +1,4 @@
+#!/usr/bin/ruby -w
 require 'thread'
 require 'optparse'
 require 'io/console'
@@ -6,28 +7,28 @@ class Listing
     require 'net/http'
     require 'json'
     require 'set'
-    @@pastebin_listing_url = URI("https://scrape.pastebin.com/api_scraping.php")
-    @@pastebin_listing_params = URI.encode_www_form({limit:"30"})
+    @@pastebin_listing_url = URI("https://scrape.pastebin.com/api_scraping.php?limit=30")
 
     public
     def initialize
-        @url = @@pastebin_listing_url
-        @url.query = @@pastebin_listing_params
         @listing = Set.new
     end
 
-    private
+    public
     def get_new_listings 
         ret = nil
         begin
-            response = HTTP.get_response(@url)
+            response = Net::HTTP.get_response(@@pastebin_listing_url)
             tags = Set.new
-            JSON.parse(@response).each {|x| tags.merge x["key"]} if response.is_a? HTTPSuccess
+            
+            JSON.parse(response.body ).each do |x|
+                tags.add x["key"]
+            end if response.is_a? Net::HTTPSuccess
             ret = tags - @listing
             @listing = tags
-        rescue ParserError
+        rescue JSON::ParserError
             puts "Error while trying to parse json"
-        rescue OpenTimeout
+        rescue Net::OpenTimeout
             puts "Error timed out during request"
         end
         return ret
@@ -36,26 +37,54 @@ class Listing
 end
 
 class Scraper
-    @@pastebin_scrape_url = URL("https://scrape.pastebin.com/api_scrape_item.php")
-    @@pastebin_scrape_params = {i: @listing_id}
+    require "net/http"
+    @@pastebin_scrape_url = "https://scrape.pastebin.com/api_scrape_item.php"
+    @@searches = {
+        "Email_Address" => /\b[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})\b/,
+        "IP_Address" => /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/,
+        "Phone_Number" => /\b\(\d{3}\) ?\d{3}( |-)?\d{4}|^\d{3}( |-)?\d{3}( |-)?\d{4}\b/,
+        "URL" => /\b((https?|ftp|file):\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
+        "Credit Card" => /\b
+                (?:4[0-9]{12}(?:[0-9]{3})?          # Visa
+                |  (?:5[1-5][0-9]{2}                # MasterCard
+                    | 222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}
+                |  3[47][0-9]{13}                   # American Express
+                |  3(?:0[0-5]|[68][0-9])[0-9]{11}   # Diners Club
+                |  6(?:011|5[0-9]{2})[0-9]{12}      # Discover
+                |  (?:2131|1800|35\d{3})\d{11}      # JCB
+            )\b/x
+    }
+
+    attr_reader :contents
+    attr_reader :matches
 
     def initialize listing_id
-        @url = @@pastebin_scrape_url
-        @url.query = @@pastebin_scrape_params
+        @url = URI(@@pastebin_scrape_url)
+        @url.query = URI.encode_www_form({:i => listing_id})
         @listing_id = listing_id
+        @contents = nil
+        @matches = ""
     end
 
     public
     def get_paste
-        @contents = HTTP.get_response(@url)
+        raise "ERRRROOOOORRRRRR!!!! you gots a race condition still" if @url.query != URI.encode_www_form({:i => @listing_id})
+        response = Net::HTTP.get_response(@url)
+        @contents = response.body if response.is_a? Net::HTTPSuccess
+        self
     end
 
-    public 
-    def 
+    public
+    def filter
+        @matches = ""
+        @@searches.each {|type, pattern| @matches << type << " " if pattern.match @contents }
+        self
+    end
 end
 
 class Send
-    def initialize title message
+    def initialize id, title, message
+        @id = id
         @title = title
         @message = message
     end
@@ -66,11 +95,12 @@ class Send
     end
 end
 
-class Email < send
+class Email < Send
     require 'net/smtp'
+    @@mutex = Mutex.new
 
-    def initialize title, message, server, src_email, dst_email, password
-        super title, message
+    def initialize id, title, message, server, src_email, dst_email, password
+        super id, title, message
         @password = password
         @server = server
         @src_email = src_email
@@ -80,7 +110,9 @@ class Email < send
 FROM: #{@src_email} <#{@src_email}>
 TO: listeners <#{@dst_email}>
 SUBJECT: #{@title}
-DATE: #{TIME.now}
+DATE: #{Time.now}
+
+link: https://pastebin.com/#{@id}
 
 #{@message}
 
@@ -89,39 +121,53 @@ END_OF_MESSAGE
 
     private 
     def post_paste
-        SMTP.enable_starttls.start(@server, 587) do |smtp|
-            smtp.send_message @email, @src_email, @dst_email
-        end
+        puts "Sending Email"
+        smtp = Net::SMTP.new(@server,587)
+        smtp.enable_starttls
+        @@mutex.synchronize {
+            smtp.start(@server, @src_email, @password, :login) do |con|
+                #puts "Sending #{@email}"
+                #con.starttls
+                con.send_message @email, @src_email, @dst_email
+            end
+        }
     end
 end
 
 def get_and_send id, con
-    message = Scraper.new(x).get_paste.filter
-    Email.new(id, message, con["server"], con["src_email"], con["dst_email"], con["password"]).send if message.is_a? HTTPSuccess
+    puts "Starting #{id}"
+    message = Scraper.new(id).get_paste.filter
+    Email.new(id, message.matches, message.contents, con[:server], con[:src_email], con[:dst_email], con[:password]).send if message.matches != ''
+    puts "Finished #{id}"
 end
 
 def main
     #parse args here
     connection_info = {
         server: nil,
-        src_email: nil
-        dst_email: nil
+        src_email: nil,
+        dst_email: nil,
         password: nil
     }
     OptionParser.new do |opts|
-        opts.on :required, "-eEMAIL", "--send-email EMAIL", "Email to send from" {|x| connection_info[:src_email] = x}
-        opts.on :required, "-rEMAIL", "--recv-email EMAIL", "Email to send to" {|x| connection_info[:dst_email] = x}
-        opts.on :required, "-sSERVER", "--smtp-server SERVER", "Smtp server to talk to" {|x| connection_info[:server] = x}
+        opts.on("-eEMAIL", "--send-email EMAIL", "Email to send from", :REQUIRED) do |x| connection_info[:src_email] = x end
+        opts.on("-rEMAIL", "--recv-email EMAIL", "Email to send to", :REQUIRED) do |x| connection_info[:dst_email] = x end
+        opts.on("-sSERVER", "--smtp-server SERVER", "Smtp server to talk to", :REQUIRED) do |x| connection_info[:server] = x end
     end.parse!
-
+    
+    print "Password: "
     connection_info[:password] = STDIN.noecho(&:gets).chomp
+    puts 
 
     pastes = Listing.new
     
     loop do
         threads = []
         pastes.get_new_listings.each {|x| threads << Thread.new {get_and_send(x, connection_info)} }
+        puts "#{threads.length} New"
         sleep(10)
         threads.each {|x| x.join()}
     end
 end
+
+main
