@@ -27,9 +27,9 @@ class Listing
             ret = tags - @listing
             @listing = tags
         rescue JSON::ParserError
-            puts "Error while trying to parse json"
+            sprint {puts "Error while trying to parse json"}
         rescue Net::OpenTimeout
-            puts "Error timed out during request"
+            sprint {puts "Error timed out during request" }
         end
         return ret
     end
@@ -43,7 +43,7 @@ class Scraper
         "Email_Address" => /\b[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})\b/,
         "IP_Address" => /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/,
         "Phone_Number" => /\b\(\d{3}\) ?\d{3}( |-)?\d{4}|^\d{3}( |-)?\d{3}( |-)?\d{4}\b/,
-        "URL" => /\b((https?|ftp|file):\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
+        "URL" => /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
         "Credit Card" => /\b
                 (?:4[0-9]{12}(?:[0-9]{3})?          # Visa
                 |  (?:5[1-5][0-9]{2}                # MasterCard
@@ -121,7 +121,7 @@ END_OF_MESSAGE
 
     private 
     def post_paste
-        puts "Sending Email"
+        sprint {puts "Sending Email"}
         smtp = Net::SMTP.new(@server,587)
         smtp.enable_starttls
         @@mutex.synchronize {
@@ -135,10 +135,18 @@ END_OF_MESSAGE
 end
 
 def get_and_send id, con
-    puts "Starting #{id}"
+    sprint {puts "Starting #{id}"}
     message = Scraper.new(id).get_paste.filter
     Email.new(id, message.matches, message.contents, con[:server], con[:src_email], con[:dst_email], con[:password]).send if message.matches != ''
-    puts "Finished #{id}"
+    sprint {puts "Finished #{id}"}
+    return
+end
+
+def sprint
+    /#{$mutex = Mutex.new}/o
+    $mutex.synchronize {
+        yield 
+    }
 end
 
 def main
@@ -162,11 +170,11 @@ def main
     pastes = Listing.new
     
     loop do
-        threads = []
-        pastes.get_new_listings.each {|x| threads << Thread.new {get_and_send(x, connection_info)} }
-        puts "#{threads.length} New"
+        new_pastes = pastes.get_new_listings
+        new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
+        sprint {puts "#{new_pastes.length} New; #{Thread.list.length} running"}
         sleep(10)
-        threads.each {|x| x.join()}
+        Thread.list.each {|x| x.join() if not x.alive?} #clean up, clean up, everyone, everywhere
     end
 end
 
