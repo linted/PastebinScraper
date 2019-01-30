@@ -40,8 +40,7 @@ class Scraper
     require "net/http"
     @@pastebin_scrape_url = "https://scrape.pastebin.com/api_scrape_item.php"
     @@searches = {
-        #"Email_Address" => /\b[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})\b/,
-        "Email_Address" => /\b((([!#$%&'*+\-\/=?^_`{|}~\w])|([!#$%&'*+\-\/=?^_`{|}~\w][!#$%&'*+\-\/=?^_`{|}~\.\w]{0,}[!#$%&'*+\-\/=?^_`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)\b/,
+        "Email_Address" => /\b((([!#$%&'*+\-\/=?^`{|}~\w])|([!#$%&'*+\-\/=?^`{|}~\w][!#$%&'*+\-\/=?^`{|}~\.\w]{0,}[!#$%&'*+\-\/=?^`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)\b/,
         "IP_Address" => /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/,
         "Phone_Number" => /\b\(\d{3}\) ?\d{3}( |-)?\d{4}|^\d{3}( |-)?\d{3}( |-)?\d{4}\b/,
         "URL" => /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
@@ -69,19 +68,15 @@ class Scraper
 
     public
     def get_paste
-        sprint {puts "Downloading #{@listing_id}"}
         response = Net::HTTP.get_response(@url)
         @contents = response.body if response.is_a? Net::HTTPSuccess
-        sprint {puts "Downloading #{@listing_id} Done"}
         self
     end
 
     public
     def filter
-        sprint {puts "Running regex on #{@listing_id}"}
         @matches = ""
-        @@searches.each {|type, pattern| @matches << type << " " if (sprint() {puts "#{type}:#{@listing_id}"}) || pattern.match(@contents) }
-        sprint {puts "Finished regex on #{@listing_id}"}
+        @@searches.each {|type, pattern| @matches << type << " " if pattern.match(@contents) }
         self
     end
 end
@@ -132,7 +127,6 @@ END_OF_MESSAGE
         @@mutex.synchronize {
             connect unless @@connection
             loop do
-                sprint {puts "Sending Email #{@id}"}
                 begin 
                     @@connection.send_message @email, @src_email, @dst_email
                 rescue StandardError => e
@@ -144,18 +138,15 @@ END_OF_MESSAGE
                 end
             end
         }
-        sprint {puts "Done sending #{@id}"}
     end
 
     private
     def connect
-        sprint { puts "Connecting!!!!!!!!" }
         @@connection = @@smtp.start(@server, @src_email, @password, :login)
     end
 
     private
     def reconnect
-        sprint { puts "Reconnecting!!!!"}
         @@connection.finish
         connect
     end
