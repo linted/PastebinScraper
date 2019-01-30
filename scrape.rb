@@ -124,7 +124,7 @@ END_OF_MESSAGE
 
     private 
     def post_paste
-        sprint {puts "Sending Email #{@title}"}
+        sprint {puts "Sending Email #{@id}"}
         @@mutex.synchronize {
             loop do
                 begin 
@@ -141,11 +141,12 @@ END_OF_MESSAGE
                 end
             end
         }
-        sprint {puts "Finished sending #{@title}"}
+        sprint {puts "Done sending #{@id}"}
     end
 
     private
     def connect
+        puts "Connecting!!!!!!!!"
         @@smtp = Net::SMTP.new(@server,587)
         @@smtp.enable_starttls
     end
@@ -188,12 +189,17 @@ def main
 
     pastes = Listing.new
     
-    loop do
-        new_pastes = pastes.get_new_listings
-        new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
-        sprint {puts "#{new_pastes.length} New; #{Thread.list.length} running"}
-        sleep(10)
-        Thread.list.each {|x| x.join() if not x.alive?} #clean up, clean up, everyone, everywhere
+    begin
+        loop do
+            new_pastes = pastes.get_new_listings
+            new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
+            sprint {puts "#{new_pastes.length} New; #{Thread.list.length} running"}
+            sleep(10)
+            Thread.list.each {|x| x.join if not x.alive?} #clean up, clean up, everyone, everywhere
+        end
+    rescue Interrupt
+        sprint {puts "Caught exception. Shutting down cleanly"}
+        Thread.list.each {|x| x.join }
     end
 end
 
