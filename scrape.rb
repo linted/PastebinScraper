@@ -22,7 +22,7 @@ class Listing
             tags = Set.new
             
             JSON.parse(response.body ).each do |x|
-                tags.add x["key"]
+                tags.add({id: x["key"], title:x["title"]})
             end if response.is_a? Net::HTTPSuccess
             ret = tags - @listing
             @listing = tags
@@ -58,10 +58,11 @@ class Scraper
     attr_reader :contents
     attr_reader :matches
 
-    def initialize listing_id
+    def initialize listing
         @url = URI(@@pastebin_scrape_url)
-        @url.query = URI.encode_www_form({:i => listing_id})
-        @listing_id = listing_id
+        @url.query = URI.encode_www_form({:i => listing[:id]})
+        @listing_id = listing[:id]
+        @title = listing[:title]
         @contents = nil
         @matches = ""
     end
@@ -82,9 +83,10 @@ class Scraper
 end
 
 class Send
-    def initialize id, title, message
+    def initialize title, id, subject, message
         @id = id
         @title = title
+        @subject = subject
         @message = message
     end
 
@@ -100,8 +102,8 @@ class Email < Send
     @@smtp = nil
     @@connection = nil
 
-    def initialize id, title, message, server, src_email, dst_email, password
-        super id, title, message
+    def initialize title, id, subject, message, server, src_email, dst_email, password
+        super title, id, subject, message
         @password = password
         @server = server
         @src_email = src_email
@@ -112,10 +114,11 @@ class Email < Send
         @email = <<END_OF_MESSAGE
 FROM: Pastebin Scraper <#{@src_email}>
 TO: listeners <#{@dst_email}>
-SUBJECT: #{@title}
+SUBJECT: #{@subject}
 DATE: #{Time.now}
 
 link: https://pastebin.com/#{@id}
+title: #{@title}
 
 #{@message}
 
@@ -164,11 +167,11 @@ END_OF_MESSAGE
 
 end
 
-def get_and_send id, con
-    sprint {puts "Starting #{id}"}
-    message = Scraper.new(id).get_paste.filter
-    Email.new(id, message.matches, message.contents, con[:server], con[:src_email], con[:dst_email], con[:password]).send if message.matches != ''
-    sprint {puts "Finished #{id}"}
+def get_and_send listing, con
+    sprint {puts "Starting #{listing[:id]}"}
+    message = Scraper.new(listing).get_paste.filter
+    Email.new(listing[:title], listing[:id], message.matches, message.contents, con[:server], con[:src_email], con[:dst_email], con[:password]).send if message.matches != ''
+    sprint {puts "Finished #{listing[:id]}"}
     return
 end
 
@@ -203,7 +206,7 @@ def main
     begin
         loop do
             new_pastes = pastes.get_new_listings
-            sprint {puts "#{new_pastes.length} New; #{Thread.list.length - 1} running"}
+            sprint {puts "#{new_pastes.length} New  |  #{Thread.list.length - 1} Active"}
             new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
             sleep(10)
             Thread.list.each {|x| x.join if not x.alive?} #clean up, clean up, everyone, everywhere
