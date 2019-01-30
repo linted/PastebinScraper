@@ -44,6 +44,7 @@ class Scraper
         "IP_Address" => /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/,
         "Phone_Number" => /\b\(\d{3}\) ?\d{3}( |-)?\d{4}|^\d{3}( |-)?\d{3}( |-)?\d{4}\b/,
         "URL" => /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
+        "Pastebin_Url" => "pastebin.com",
         "Credit Card" => /\b
                 (?:4[0-9]{12}(?:[0-9]{3})?          # Visa
                 |  (?:5[1-5][0-9]{2}                # MasterCard
@@ -112,7 +113,8 @@ class Email < Send
 
         setup unless @@smtp
 
-        @email = <<END_OF_MESSAGE
+        begin
+            @email = <<END_OF_MESSAGE
 FROM: Pastebin Scraper <#{@src_email}>
 TO: listeners <#{@dst_email}>
 SUBJECT: [#{@subject}] #{@title} 
@@ -123,6 +125,10 @@ link: https://pastebin.com/#{@id}
 #{@message}
 
 END_OF_MESSAGE
+        rescue Encoding::CompatibilityError => e
+            sprint {puts "Error: #{e}"}
+        end
+
     end
 
     private 
@@ -145,7 +151,12 @@ END_OF_MESSAGE
 
     private
     def connect
-        @@connection = @@smtp.start(@server, @src_email, @password, :login)
+        begin
+            @@connection = @@smtp.start(@server, @src_email, @password, :login)
+        rescue Net::SMTPAuthenticationError => e
+            sprint {puts "Fatal Error: #{e}"}
+            exit
+        end            
     end
 
     private
@@ -180,6 +191,7 @@ def sprint
     $mutex.synchronize {
         yield 
     }
+    $stdout.flush
 end
 
 def main
@@ -198,7 +210,7 @@ def main
     
     print "Password: "
     begin
-        connection_info[:password] = STDIN.noecho(&:gets).chomp
+        connection_info[:password] = IO::console.getpass.chomp
     rescue StandardError
         connection_info[:password] = gets.chomp
     end
@@ -211,7 +223,6 @@ def main
         loop do
             new_pastes = pastes.get_new_listings
             sprint {puts "#{new_pastes.length} New  |  #{Thread.list.length - 1} Active"}
-            $stdout.flush
             new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
             sleep(10)
             Thread.list.each {|x| x.join if not x.alive?} #clean up, clean up, everyone, everywhere
