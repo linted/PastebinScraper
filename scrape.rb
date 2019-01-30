@@ -203,8 +203,8 @@ def main
     begin
         loop do
             new_pastes = pastes.get_new_listings
-            new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
             sprint {puts "#{new_pastes.length} New; #{Thread.list.length - 1} running"}
+            new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
             sleep(10)
             Thread.list.each {|x| x.join if not x.alive?} #clean up, clean up, everyone, everywhere
         end
