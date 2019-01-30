@@ -165,7 +165,8 @@ def main
     
     print "Password: "
     connection_info[:password] = STDIN.noecho(&:gets).chomp
-    puts 
+    puts
+    connection_info.each {|k,v| raise "Error, please supply all paramaters" if not v}
 
     pastes = Listing.new
     
