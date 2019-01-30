@@ -77,10 +77,10 @@ class Scraper
 
     public
     def filter
-        sprint {puts "Running regex on #{listing_id}"}
+        sprint {puts "Running regex on #{@listing_id}"}
         @matches = ""
         @@searches.each {|type, pattern| @matches << type << " " if pattern.match @contents }
-        sprint {puts "Finished regex on #{listing_id}"}
+        sprint {puts "Finished regex on #{@listing_id}"}
         self
     end
 end
