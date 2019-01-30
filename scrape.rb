@@ -78,7 +78,7 @@ class Scraper
     def filter
         @matches = ""
         @@searches.each {|type, pattern| @matches << type << " " if pattern.match(@contents) }
-        @matches.chomp!
+        @matches.chomp! " " #removed trailing space
         self
     end
 end
@@ -197,7 +197,11 @@ def main
     end.parse!
     
     print "Password: "
-    connection_info[:password] = STDIN.noecho(&:gets).chomp
+    begin
+        connection_info[:password] = STDIN.noecho(&:gets).chomp
+    rescue StandardError
+        connection_info[:password] = gets.chomp
+    end
     puts
     connection_info.each {|k,v| raise "Error, please supply all paramaters" if not v}
 
@@ -207,6 +211,7 @@ def main
         loop do
             new_pastes = pastes.get_new_listings
             sprint {puts "#{new_pastes.length} New  |  #{Thread.list.length - 1} Active"}
+            $stdout.flush
             new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
             sleep(10)
             Thread.list.each {|x| x.join if not x.alive?} #clean up, clean up, everyone, everywhere
