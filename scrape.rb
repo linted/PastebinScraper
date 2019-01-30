@@ -99,6 +99,7 @@ class Email < Send
     require 'net/smtp'
     @@mutex = Mutex.new
     @@smtp = nil
+    @@connection = nil
 
     def initialize id, title, message, server, src_email, dst_email, password
         super id, title, message
@@ -106,6 +107,8 @@ class Email < Send
         @server = server
         @src_email = src_email
         @dst_email = dst_email
+
+        setup unless @@smtp
 
         @email = <<END_OF_MESSAGE
 FROM: Pastebin Scraper <#{@src_email}>
@@ -122,15 +125,12 @@ END_OF_MESSAGE
 
     private 
     def post_paste
-        sprint {puts "Sending Email #{@id}"}
         @@mutex.synchronize {
-            connect unless @@smtp
+            connect unless @@connection
             loop do
+                sprint {puts "Sending Email #{@id}"}
                 begin 
-                    @@smtp.start(@server, @src_email, @password, :login) do |con|
-                        #puts "Sending #{@email}"
-                        con.send_message @email, @src_email, @dst_email
-                    end
+                    @@connection.send_message @email, @src_email, @dst_email
                 rescue StandardError => e
                     sprint { puts "Caught exception while trying to send email: #{e}"}
                     connect
@@ -145,9 +145,26 @@ END_OF_MESSAGE
 
     private
     def connect
-        puts "Connecting!!!!!!!!"
+        sprint { puts "Connecting!!!!!!!!" }
+        @@connection = @@smtp.start(@server, @src_email, @password, :login)
+    end
+
+    private
+    def reconnect
+        sprint { puts "Reconnecting!!!!"}
+        @@connection.finish
+        connect
+    end
+
+    public
+    def setup
         @@smtp = Net::SMTP.new(@server,587)
         @@smtp.enable_starttls
+    end
+
+    public
+    def shutdown
+        @@connection.finish if @@connection
     end
 
 end
@@ -197,8 +214,9 @@ def main
             Thread.list.each {|x| x.join if not x.alive?} #clean up, clean up, everyone, everywhere
         end
     rescue Interrupt
-        sprint {puts "Caught exception. Shutting down cleanly"}
-        Thread.list.each {|x| x.join }
+        sprint {puts "Caught exception. Shutting down #{Thread.list.length - 1} threads cleanly"}
+        Thread.list.each {|x| x.join unless x == Thread.current}
+        sprint {puts "Threads remaining #{Thread.list.length - 1}"}
     end
 end
 
