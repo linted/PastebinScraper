@@ -68,10 +68,10 @@ class Scraper
 
     public
     def get_paste
-        sprint {puts "Downloading #{listing_id}"}
+        sprint {puts "Downloading #{@listing_id}"}
         response = Net::HTTP.get_response(@url)
         @contents = response.body if response.is_a? Net::HTTPSuccess
-        sprint {puts "Downloading #{listing_id} Done"}
+        sprint {puts "Downloading #{@listing_id} Done"}
         self
     end
 
