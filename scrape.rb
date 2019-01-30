@@ -68,16 +68,19 @@ class Scraper
 
     public
     def get_paste
-        raise "ERRRROOOOORRRRRR!!!! you gots a race condition still" if @url.query != URI.encode_www_form({:i => @listing_id})
+        sprint {puts "Downloading #{listing_id}"}
         response = Net::HTTP.get_response(@url)
         @contents = response.body if response.is_a? Net::HTTPSuccess
+        sprint {puts "Downloading #{listing_id} Done"}
         self
     end
 
     public
     def filter
+        sprint {puts "Running regex on #{listing_id}"}
         @matches = ""
         @@searches.each {|type, pattern| @matches << type << " " if pattern.match @contents }
+        sprint {puts "Finished regex on #{listing_id}"}
         self
     end
 end
