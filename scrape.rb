@@ -40,7 +40,8 @@ class Scraper
     require "net/http"
     @@pastebin_scrape_url = "https://scrape.pastebin.com/api_scrape_item.php"
     @@searches = {
-        "Email_Address" => /\b[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})\b/,
+        #"Email_Address" => /\b[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})\b/,
+        "Email_Address" => /\b((([!#$%&'*+\-\/=?^_`{|}~\w])|([!#$%&'*+\-\/=?^_`{|}~\w][!#$%&'*+\-\/=?^_`{|}~\.\w]{0,}[!#$%&'*+\-\/=?^_`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)\b/,
         "IP_Address" => /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/,
         "Phone_Number" => /\b\(\d{3}\) ?\d{3}( |-)?\d{4}|^\d{3}( |-)?\d{3}( |-)?\d{4}\b/,
         "URL" => /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
@@ -79,7 +80,7 @@ class Scraper
     def filter
         sprint {puts "Running regex on #{@listing_id}"}
         @matches = ""
-        @@searches.each {|type, pattern| @matches << type << " " if pattern.match @contents }
+        @@searches.each {|type, pattern| @matches << type << " " if (sprint() {puts "#{type}:#{@listing_id}"}) || pattern.match(@contents) }
         sprint {puts "Finished regex on #{@listing_id}"}
         self
     end
@@ -212,7 +213,7 @@ def main
         loop do
             new_pastes = pastes.get_new_listings
             new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
-            sprint {puts "#{new_pastes.length} New; #{Thread.list.length} running"}
+            sprint {puts "#{new_pastes.length} New; #{Thread.list.length - 1} running"}
             sleep(10)
             Thread.list.each {|x| x.join if not x.alive?} #clean up, clean up, everyone, everywhere
         end
