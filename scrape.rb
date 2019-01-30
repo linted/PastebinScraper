@@ -122,16 +122,28 @@ END_OF_MESSAGE
     private 
     def post_paste
         sprint {puts "Sending Email"}
-        smtp = Net::SMTP.new(@server,587)
-        smtp.enable_starttls
         @@mutex.synchronize {
-            smtp.start(@server, @src_email, @password, :login) do |con|
-                #puts "Sending #{@email}"
-                #con.starttls
-                con.send_message @email, @src_email, @dst_email
+            loop do
+                begin 
+                    smtp.start(@server, @src_email, @password, :login) do |con|
+                        #puts "Sending #{@email}"
+                        #con.starttls
+                        con.send_message @email, @src_email, @dst_email
+                    end
+                    break
+                rescue
+                    sprint { puts "Caught exception while trying to send email"}
+                end
             end
         }
     end
+
+    private
+    def connect
+        @@smtp = Net::SMTP.new(@server,587)
+        @@smtp.enable_starttls
+    end
+
 end
 
 def get_and_send id, con
