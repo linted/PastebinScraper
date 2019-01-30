@@ -78,6 +78,7 @@ class Scraper
     def filter
         @matches = ""
         @@searches.each {|type, pattern| @matches << type << " " if pattern.match(@contents) }
+        @matches.chomp!
         self
     end
 end
@@ -114,11 +115,10 @@ class Email < Send
         @email = <<END_OF_MESSAGE
 FROM: Pastebin Scraper <#{@src_email}>
 TO: listeners <#{@dst_email}>
-SUBJECT: #{@subject}
+SUBJECT: [#{@subject}] #{@title} 
 DATE: #{Time.now}
 
 link: https://pastebin.com/#{@id}
-title: #{@title}
 
 #{@message}
 
