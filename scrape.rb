@@ -98,6 +98,7 @@ end
 class Email < Send
     require 'net/smtp'
     @@mutex = Mutex.new
+    @@smtp = nil
 
     def initialize id, title, message, server, src_email, dst_email, password
         super id, title, message
@@ -105,6 +106,8 @@ class Email < Send
         @server = server
         @src_email = src_email
         @dst_email = dst_email
+
+        connect unless @@smtp 
 
         @email = <<END_OF_MESSAGE
 FROM: #{@src_email} <#{@src_email}>
@@ -121,21 +124,24 @@ END_OF_MESSAGE
 
     private 
     def post_paste
-        sprint {puts "Sending Email"}
+        sprint {puts "Sending Email #{@title}"}
         @@mutex.synchronize {
             loop do
                 begin 
-                    smtp.start(@server, @src_email, @password, :login) do |con|
+                    @@smtp.start(@server, @src_email, @password, :login) do |con|
                         #puts "Sending #{@email}"
-                        #con.starttls
                         con.send_message @email, @src_email, @dst_email
                     end
+                rescue StandardError => e
+                    sprint { puts "Caught exception while trying to send email: #{e}"}
+                    connect
                     break
-                rescue
-                    sprint { puts "Caught exception while trying to send email"}
+                else
+                    break #no errors!
                 end
             end
         }
+        sprint {puts "Finished sending #{@title}"}
     end
 
     private
