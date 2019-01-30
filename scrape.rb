@@ -107,10 +107,8 @@ class Email < Send
         @src_email = src_email
         @dst_email = dst_email
 
-        connect unless @@smtp 
-
         @email = <<END_OF_MESSAGE
-FROM: #{@src_email} <#{@src_email}>
+FROM: Pastebin Scraper <#{@src_email}>
 TO: listeners <#{@dst_email}>
 SUBJECT: #{@title}
 DATE: #{Time.now}
@@ -126,6 +124,7 @@ END_OF_MESSAGE
     def post_paste
         sprint {puts "Sending Email #{@id}"}
         @@mutex.synchronize {
+            connect unless @@smtp
             loop do
                 begin 
                     @@smtp.start(@server, @src_email, @password, :login) do |con|
