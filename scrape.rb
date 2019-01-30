@@ -44,7 +44,7 @@ class Scraper
         "IP_Address" => /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/,
         "Phone_Number" => /\b\(\d{3}\) ?\d{3}( |-)?\d{4}|^\d{3}( |-)?\d{3}( |-)?\d{4}\b/,
         "URL" => /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
-        "Pastebin_Url" => "pastebin.com",
+        "Pastebin_Url" => /pastebin.com/,
         "Credit Card" => /\b
                 (?:4[0-9]{12}(?:[0-9]{3})?          # Visa
                 |  (?:5[1-5][0-9]{2}                # MasterCard
