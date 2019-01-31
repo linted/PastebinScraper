@@ -26,6 +26,9 @@ class Listing
             end if response.is_a? Net::HTTPSuccess
             ret = tags - @listing
             @listing = tags
+        rescue SocketError
+            sprint {puts "Error... well we couldn't get to pastebin... return nothing i guess?"}
+            ret = tags
         rescue JSON::ParserError
             sprint {puts "Error while trying to parse json"}
         rescue Net::OpenTimeout
@@ -45,6 +48,7 @@ class Scraper
         "Phone_Number" => /\b\(\d{3}\) ?\d{3}( |-)?\d{4}|^\d{3}( |-)?\d{3}( |-)?\d{4}\b/,
         "URL" => /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
         "Pastebin_Url" => /pastebin.com/,
+        "Imgur_Url" => /imgur.com/,
         "Credit Card" => /\b
                 (?:4[0-9]{12}(?:[0-9]{3})?          # Visa
                 |  (?:5[1-5][0-9]{2}                # MasterCard
@@ -122,11 +126,11 @@ DATE: #{Time.now}
 
 link: https://pastebin.com/#{@id}
 
-#{@message}
+#{@message.force_encoding("UTF-8")}
 
 END_OF_MESSAGE
         rescue Encoding::CompatibilityError => e
-            sprint {puts "Error: #{e}"}
+            sprint {puts "Error [#{id}]: #{e}"}
         end
 
     end
@@ -140,7 +144,7 @@ END_OF_MESSAGE
                     @@connection.send_message @email, @src_email, @dst_email
                 rescue StandardError => e
                     sprint { puts "Caught exception while trying to send email: #{e}"}
-                    connect
+                    reconnect
                     break
                 else
                     break #no errors!
@@ -179,10 +183,10 @@ END_OF_MESSAGE
 end
 
 def get_and_send listing, con
-    sprint {puts "Starting #{listing[:id]}"}
+    #sprint {puts "Starting #{listing[:id]}"}
     message = Scraper.new(listing).get_paste.filter
     Email.new(listing[:title], listing[:id], message.matches, message.contents, con[:server], con[:src_email], con[:dst_email], con[:password]).send if message.matches != ''
-    sprint {puts "Finished #{listing[:id]}"}
+    #sprint {puts "Finished #{listing[:id]}"}
     return
 end
 
