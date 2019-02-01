@@ -177,7 +177,11 @@ END_OF_MESSAGE
 
     private
     def reconnect
-        @@connection.finish
+        begin
+            @@connection.finish
+        rescue StandardError
+            setup
+        end
         connect
     end
 
