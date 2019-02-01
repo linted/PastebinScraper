@@ -154,6 +154,10 @@ END_OF_MESSAGE
             loop do
                 begin 
                     @@connection.send_message @email, @src_email, @dst_email
+                rescue Net::SMTPUnknownError
+                    sprint { puts "Unkown error occured, #{e.message}"}
+                    $GLOBAL_STOP_FLAG = true
+
                 rescue StandardError => e
                     sprint { puts "Error during send [#{e.class}]: #{e.message}"}
                     reconnect
@@ -171,6 +175,7 @@ END_OF_MESSAGE
             @@connection = @@smtp.start(@server, @src_email, @password, :login)
         rescue Net::SMTPAuthenticationError => e
             sprint {puts "Fatal Error: #{e}"}
+            $GLOBAL_STOP_FLAG = true
             exit
         end            
     end
@@ -240,9 +245,10 @@ def main
     connection_info.each {|k,v| raise "Error, please supply all paramaters" if not v}
 
     pastes = Listing.new
+    $GLOBAL_STOP_FLAG = nil
     
     begin
-        loop do
+        until $GLOBAL_STOP_FLAG
             new_pastes = pastes.get_new_listings
             sprint {puts "#{new_pastes.length} New  |  #{Thread.list.length - 1} Active"}
             new_pastes.each {|x| Thread.new {get_and_send(x, connection_info)} }
