@@ -49,16 +49,22 @@ class Scraper
         "URL" => /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
         "Pastebin_Url" => /pastebin.com/,
         "Imgur_Url" => /imgur.com/,
-        "Credit Card" => /\b
-                (?:4[0-9]{12}(?:[0-9]{3})?          # Visa
-                |  (?:5[1-5][0-9]{2}                # MasterCard
-                    | 222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}
-                |  3[47][0-9]{13}                   # American Express
-                |  3(?:0[0-5]|[68][0-9])[0-9]{11}   # Diners Club
-                |  6(?:011|5[0-9]{2})[0-9]{12}      # Discover
-                |  (?:2131|1800|35\d{3})\d{11}      # JCB
-            )\b/x
+        "RSA_pub" => /ssh-rsa/,
+        "RSA_priv" => /-----BEGIN RSA PRIVATE KEY-----/#,
+        # "Credit Card" => /\b
+        #         (?:4[0-9]{12}(?:[0-9]{3})?          # Visa
+        #         |  (?:5[1-5][0-9]{2}                # MasterCard
+        #             | 222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}
+        #         |  3[47][0-9]{13}                   # American Express
+        #         |  3(?:0[0-5]|[68][0-9])[0-9]{11}   # Diners Club
+        #         |  6(?:011|5[0-9]{2})[0-9]{12}      # Discover
+        #         |  (?:2131|1800|35\d{3})\d{11}      # JCB
+        #     )\b/x
     }
+
+    @@blacklist = [
+        /Carder007/ #credit card seller. kept spaming 1/31/19
+    ]
 
     attr_reader :contents
     attr_reader :matches
@@ -82,6 +88,7 @@ class Scraper
     public
     def filter
         @matches = ""
+        @@blacklist.each {|pattern| return self if pattern.match(@contents) }
         @@searches.each {|type, pattern| @matches << type << " " if pattern.match(@contents) }
         @matches.chomp! " " #removed trailing space
         self
@@ -185,7 +192,9 @@ end
 def get_and_send listing, con
     #sprint {puts "Starting #{listing[:id]}"}
     message = Scraper.new(listing).get_paste.filter
-    Email.new(listing[:title], listing[:id], message.matches, message.contents, con[:server], con[:src_email], con[:dst_email], con[:password]).send if message.matches != ''
+    if message.matches != ''
+        Email.new(listing[:title], listing[:id], message.matches, message.contents, con[:server], con[:src_email], con[:dst_email], con[:password]).send
+    end
     #sprint {puts "Finished #{listing[:id]}"}
     return
 end
