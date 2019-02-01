@@ -64,7 +64,9 @@ class Scraper
 
     @@blacklist = [
         /Carder007/,        #credit card seller. kept spaming 1/31/19
-        /#EXTM3U/           #IPTV listings
+        /#EXTM3U/,          #IPTV listings
+        /#EXTINF/,          #IPTV listing
+        /roblox/            #people seem to love hacking this game
     ]
 
     attr_reader :contents
