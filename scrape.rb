@@ -63,13 +63,14 @@ class Scraper
     }
 
     @@blacklist = [
-        /Carder007/,        #credit card seller. kept spaming                   | 1/31/19
-        /#EXTM3U/,          #IPTV listings                                      | 1/31/19
-        /ETXINF/,           #More IPTV stuff                                    | 2/1/19
-        /#EXTINF/,          #IPTV listing                                       | 1/31/19
-        /roblox/i,          #people seem to love hacking this game              | 1/31/19
-        /minecraft/i,       # I HATE 12 year olds                               | 1/31/19
-        /Welcome To Q Research General/   #                                     | 1/31/19
+        /Carder007/,                        #credit card seller. kept spaming                   | 1/31/19
+        /#EXTM3U/,                          #IPTV listings                                      | 1/31/19
+        /ETXINF/,                           #More IPTV stuff                                    | 2/1/19
+        /#EXTINF/,                          #IPTV listing                                       | 1/31/19
+        /roblox/i,                          #people seem to love hacking this game              | 1/31/19
+        /minecraft/i,                       # I HATE 12 year olds                               | 1/31/19
+        /Welcome To Q Research General/,    #                                                   | 1/31/19
+        /WATCH FULL VIDEO ON/i              # porn                                              | 2/1/19
     ]
 
     attr_reader :contents
