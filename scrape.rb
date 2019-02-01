@@ -166,7 +166,7 @@ END_OF_MESSAGE
                     break #no errors!
                 end
             end
-        }
+        } unless $GLOBAL_STOP_FLAG
     end
 
     private
