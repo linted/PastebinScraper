@@ -50,7 +50,7 @@ class Scraper
         "Pastebin_Url" => /pastebin.com/i,
         "Imgur_Url" => /imgur.com/i,
         "RSA_pub" => /ssh-rsa/i,
-        "RSA_priv" => /-----BEGIN RSA PRIVATE KEY-----/#,
+        "RSA_priv" => /-----BEGIN RSA PRIVATE KEY-----/,
         "Credit Card" => /\b
                 (?:4[0-9]{12}(?:[0-9]{3})?          # Visa
                 |  (?:5[1-5][0-9]{2}                # MasterCard
