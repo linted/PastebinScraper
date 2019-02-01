@@ -154,8 +154,8 @@ END_OF_MESSAGE
             loop do
                 begin 
                     @@connection.send_message @email, @src_email, @dst_email
-                rescue Net::SMTPUnknownError
-                    sprint { puts "Unkown error occured, #{e.message}"}
+                rescue Net::SMTPUnknownError => e
+                    sprint { puts "Unkown error occured: #{e.message}"}
                     $GLOBAL_STOP_FLAG = true
 
                 rescue StandardError => e
@@ -255,11 +255,11 @@ def main
             sleep(10)
             Thread.list.each {|x| x.join if not x.alive?} #clean up, clean up, everyone, everywhere
         end
-    rescue Interrupt
-        sprint {puts "Caught exception. Shutting down #{Thread.list.length - 1} threads cleanly"}
-        Thread.list.each {|x| x.join unless x == Thread.current}
-        sprint {puts "Threads remaining #{Thread.list.length - 1}"}
+    rescue
     end
+    sprint {puts "Caught exception. Shutting down #{Thread.list.length - 1} threads cleanly"}
+    Thread.list.each {|x| x.join unless x == Thread.current}
+    sprint {puts "Threads remaining #{Thread.list.length - 1}"}
 end
 
 main
