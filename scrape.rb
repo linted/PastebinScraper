@@ -47,9 +47,9 @@ class Scraper
         "IP_Address" => /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/,
         "Phone_Number" => /\b\(\d{3}\) ?\d{3}( |-)?\d{4}|^\d{3}( |-)?\d{3}( |-)?\d{4}\b/,
         "URL" => /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
-        "Pastebin_Url" => /pastebin.com/,
-        "Imgur_Url" => /imgur.com/,
-        "RSA_pub" => /ssh-rsa/,
+        "Pastebin_Url" => /pastebin.com/i,
+        "Imgur_Url" => /imgur.com/i,
+        "RSA_pub" => /ssh-rsa/i,
         "RSA_priv" => /-----BEGIN RSA PRIVATE KEY-----/#,
         # "Credit Card" => /\b
         #         (?:4[0-9]{12}(?:[0-9]{3})?          # Visa
@@ -66,7 +66,7 @@ class Scraper
         /Carder007/,        #credit card seller. kept spaming                   | 1/31/19
         /#EXTM3U/,          #IPTV listings                                      | 1/31/19
         /#EXTINF/,          #IPTV listing                                       | 1/31/19
-        /roblox/i,           #people seem to love hacking this game              | 1/31/19
+        /roblox/i,          #people seem to love hacking this game              | 1/31/19
         /minecraft/i        # I HATE 12 year olds                                | 1/31/19
     ]
 
