@@ -155,7 +155,7 @@ END_OF_MESSAGE
                 begin 
                     @@connection.send_message @email, @src_email, @dst_email
                 rescue StandardError => e
-                    sprint { puts "Caught exception while trying to send email: #{e}"}
+                    sprint { puts "Error during send [#{e.class}]: #{e.message}"}
                     reconnect
                     break
                 else
