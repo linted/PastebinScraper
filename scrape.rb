@@ -67,7 +67,8 @@ class Scraper
         /#EXTM3U/,          #IPTV listings                                      | 1/31/19
         /#EXTINF/,          #IPTV listing                                       | 1/31/19
         /roblox/i,          #people seem to love hacking this game              | 1/31/19
-        /minecraft/i        # I HATE 12 year olds                                | 1/31/19
+        /minecraft/i        # I HATE 12 year olds                               | 1/31/19
+        /Welcome To Q Research General/   #                                     | 1/31/19
     ]
 
     attr_reader :contents
