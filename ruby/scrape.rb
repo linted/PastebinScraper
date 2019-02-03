@@ -72,6 +72,8 @@ class Scraper
         /minecraft/i,                       # I HATE 12 year olds                               | 1/31/19
         /Welcome To Q Research General/,    #                                                   | 1/31/19
         /WATCH FULL VIDEO ON/i              # porn                                              | 2/1/19
+        /simplyevents.io/                   # spam                                              | 2/3/19
+        /swarife.com/                       # scam                                              | 2/3/19
     ]
 
     attr_reader :contents
