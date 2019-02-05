@@ -6,11 +6,12 @@ class Match
     def initialize title, contents
         @title = title
         @contents = contents
-        @matches = ''
+        @title = ''
+        @comments = {}
     end
 
     def find
-        @matches << check_title << check_contents if not blacklisted?
+        @title << check_title << check_contents if not blacklisted?
     end
 
     def check_title
@@ -21,6 +22,10 @@ class Match
         ""
     end
 
+    def blacklisted?
+        false
+    end
+
 end
 
 #########################################
@@ -28,7 +33,7 @@ end
 #########################################
 
 class Match_url < Match
-    @@url_classifier = /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/
+    @@url_classifier = /\b((?:https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/
     @@url_types = {
         "Pastebin_Url" => URL_pastebin,
         "Imgur_Url" => URL_imgur,
@@ -37,11 +42,22 @@ class Match_url < Match
     }
 
     def check_contents
-        @@url_types.each do |title, search|
-            
+        if @@url_classifier.match @contents
+            @matches << "Url" 
+            @@url_types.each do |title, search|
+                
+            end
+            @matches
         end
-        @matches
     end
 
 end
 
+
+class Match_email < Match
+    @@email_classifier = /\b((([!#$%&'*+\-\/=?^`{|}~\w])|([!#$%&'*+\-\/=?^`{|}~\w][!#$%&'*+\-\/=?^`{|}~\.\w]{0,}[!#$%&'*+\-\/=?^`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)\b/
+
+    def check_contents
+
+    end
+end
