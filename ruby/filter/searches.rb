@@ -1,27 +1,24 @@
 #!/usr/bin/ruby -w
-
+require "url_types"
 
 #Abstract Base Classes
 class Match
     def initialize title, contents
         @title = title
         @contents = contents
+        @matches = ''
     end
 
-    def found?
-        check_title or check_contents
+    def find
+        @matches << check_title << check_contents if not blacklisted?
     end
 
-end
-
-class Filter
-    def initialize title, contents
-        @title = title
-        @contents = contents
+    def check_title
+        ""        #we don't care what the title says
     end
 
-    def blacklisted?
-        check_title and check_contents
+    def check_contents
+        ""
     end
 
 end
@@ -32,20 +29,19 @@ end
 
 class Match_url < Match
     @@url_classifier = /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/
-    @@url_static = {
-        "Pastebin_Url" => /pastebin.com/i,
-        "Imgur_Url" => /imgur.com/i,
-        "Google_Drive" => /drive.google.com/i
+    @@url_types = {
+        "Pastebin_Url" => URL_pastebin,
+        "Imgur_Url" => URL_imgur,
+        "Google_Drive" => URL_google_drive,
+        "Short_link" => URL_short_link
     }
-    @@url_shortened = /\b(http:\/\/(?:bit\.ly|t\.co|lnkd\.in|tcrn\.ch)\S*)\b/
-
-    def check_title
-        true        #we don't care what the title says
-    end
 
     def check_contents
-
+        @@url_types.each do |title, search|
+            
+        end
+        @matches
     end
 
-
 end
+
