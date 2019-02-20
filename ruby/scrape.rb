@@ -43,7 +43,7 @@ class Scraper
     require "net/http"
     @@pastebin_scrape_url = "https://scrape.pastebin.com/api_scrape_item.php"
     @@searches = {
-        "Email_Address" => /\b((([!#$%&'*+\-\/=?^`{|}~\w])|([!#$%&'*+\-\/=?^`{|}~\w][!#$%&'*+\-\/=?^`{|}~\.\w]{0,}[!#$%&'*+\-\/=?^`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)\b/,
+        "Email_Address" => //,
         "IP_Address" => /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/,
         "Phone_Number" => /\b\(\d{3}\) ?\d{3}( |-)?\d{4}|^\d{3}( |-)?\d{3}( |-)?\d{4}\b/,
         "URL" => /\b((https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/,
@@ -66,7 +66,7 @@ class Scraper
     @@blacklist = [
         /Carder007/,                        #credit card seller. kept spaming                   | 1/31/19
         /#EXTM3U/,                          #IPTV listings                                      | 1/31/19
-        /ETXINF/,                           #More IPTV stuff                                    | 2/1/19
+        /#ETXINF/,                          #More IPTV stuff                                    | 2/1/19
         /#EXTINF/,                          #IPTV listing                                       | 1/31/19
         /roblox/i,                          #people seem to love hacking this game              | 1/31/19
         /minecraft/i,                       # I HATE 12 year olds                               | 1/31/19
