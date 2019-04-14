@@ -33,7 +33,7 @@ end
 #########################################
 
 class Match_url < Match
-    @@url_classifier = /\b((?:https?|ftp|file):\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\b/
+    @@url_classifier = /\b((?:https?|ftp|file):\/\/[\da-z\.-]+\.[a-z\.]{2,6}[\/\w \.-]*\/?)\b/
     @@url_types = {
         "Pastebin_Url" => URL_pastebin,
         "Imgur_Url" => URL_imgur,
@@ -42,13 +42,16 @@ class Match_url < Match
     }
 
     def check_contents
-        if @@url_classifier.match @contents
-            @matches << "Url" 
-            @@url_types.each do |title, search|
-                
-            end
-            @matches
+        found = false
+        @contents.scan(@@url_classifier) do |x|
+            found = true
+            check_url_type x
         end
+        found ? "url" : ""
+    end
+
+    def check_url_type url
+
     end
 
 end
