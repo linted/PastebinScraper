@@ -10,7 +10,7 @@ cd ..
 
 #start building go-yara
 export GOPATH=$(pwd):$GOPATH
-export export PKG_CONFIG_PATH=$(pwd)/libyara/libyara/:$PKG_CONFIG_PATH
+export export PKG_CONFIG_PATH=$(pwd)/libyara/libyara/:$(go env PKG_CONFIG_PATH)
 export CGO_CFLAGS="-I$(pwd)/libyara/libyara/include/ $(go env CGO_CFLAGS)" 
 export CGO_LDFLAGS="-L$(pwd)/libyara/libyara/.libs -lm $(go env CGO_LDFLAGS)"
 go get github.com/hillu/go-yara
