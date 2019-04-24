@@ -4,7 +4,9 @@
 cd libyara
 ./bootstrap.sh
 ./configure --disable-shared --enable-static --without-crypto
-make clean
+if [[ $1 = "-c" ]]; then
+    make clean
+fi
 make -j 8
 cd ..
 
@@ -18,3 +20,5 @@ if [ $? -ne 0 ]; then
     echo "__________________________BUILD ERROR__________________________"
     go env
 fi
+
+go build main.go
