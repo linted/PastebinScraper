@@ -6,7 +6,4 @@ libtool
 bisonls
 
 # How to build
-cd libyara
-./bootstrap.sh
-./configure --disable-shared --enable-static --without-crypto
-make -j 8 
+./build.sh
