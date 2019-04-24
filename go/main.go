@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -71,4 +72,5 @@ func main() {
 		}
 	}
 
+	fmt.Print("Everything works up to here!\n")
 }
