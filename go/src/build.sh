@@ -21,4 +21,7 @@ if [ $? -ne 0 ]; then
     go env
 fi
 
-go build main.go
+echo "-----------------------------------------------"
+pwd
+go build cmd/main.go
+echo $?
