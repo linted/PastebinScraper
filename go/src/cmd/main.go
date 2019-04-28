@@ -44,24 +44,13 @@ func (r *rules) String() string {
 	return s
 }
 
-func main() {
-	var (
-		yaraRules rules
-	)
-
-	flag.Var(&yaraRules, "rule", "Add yara rule")
-	flag.Parse()
-
-	if len(yaraRules) == 0 {
-		log.Fatal("No rules provided\n")
-	}
-
+func compileRules(files rules) *yara.Rules {
 	compiler, err := yara.NewCompiler()
 	if err != nil {
 		log.Fatal("Unable to instantiate yara compiler\n")
 	}
 
-	for _, ruleFile := range yaraRules {
+	for _, ruleFile := range files {
 		f, err := os.Open(ruleFile.filename)
 		if err != nil {
 			log.Fatalf("Could not open rule file %s: %s", ruleFile.filename, err)
@@ -72,5 +61,37 @@ func main() {
 		}
 	}
 
+	scanner, err := compiler.GetRules()
+	if err != nil {
+		log.Fatalf("Unable to compile rules: %s", err)
+	}
+
+	return scanner
+}
+
+func main() {
+	var (
+		yaraRuleFiles rules
+	)
+
+	flag.Var(&yaraRuleFiles, "rule", "Add yara rule")
+	flag.Parse()
+
+	if len(yaraRuleFiles) == 0 {
+		log.Fatal("No rules provided\n")
+	}
+
+	scanner := compileRules(yaraRuleFiles)
+
 	fmt.Print("Everything works up to here!\n")
+
+	matches, err := scanner.ScanProc(10342, 0, 0)
+	if err != nil {
+		log.Fatalf("Something went wrong while scanning the proc: %s", err)
+	}
+	log.Printf("Results = %d\n", len(matches))
+	for _, match := range matches {
+		log.Printf("+ [%s] %s", match.Namespace, match.Rule)
+	}
+
 }
