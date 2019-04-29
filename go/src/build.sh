@@ -21,4 +21,4 @@ if [ $? -ne 0 ]; then
     go env
 fi
 
-go build cmd/main.go
+go build cmd/*.go
