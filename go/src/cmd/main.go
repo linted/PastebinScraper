@@ -9,25 +9,15 @@ import (
 	"github.com/hillu/go-yara"
 )
 
+var QUEUESIZE := 20
+
 func waitForInevitableHeatDeathOfTheUniverse() { //Or atleast until we receive a signal
 	log.Print("The heat death is coming. I can feel it in my bones!\n")
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 	<-signals
-	log.Print("Received interupt signal.\n")
+	log.Print("Received interupt signal, I guess we will stop waiting.\n")
 	return
-}
-
-func parse(matches chan []yara.MatchRule) {
-	//test code start
-	log.Print("Started parsing")
-	for m := range matches {
-		for _, match := range m {
-			log.Printf("Matched rule: %s\n", match.Rule)
-		}
-	}
-
-	//test code end
 }
 
 func main() {
@@ -43,8 +33,8 @@ func main() {
 	}
 
 	scanner := compileRules(yaraRuleFiles)
-	inputStream := make(chan []byte, 20)           //20 items from pastebin should probably be more then enough, right?
-	matchStream := make(chan []yara.MatchRule, 20) //should probably match the number of inputs
+	inputStream := make(chan []byte, QUEUESIZE)           //queuesize items from pastebin should probably be more then enough, right?
+	matchStream := make(chan []yara.MatchRule, QUEUESIZE) //should probably match the number of inputs
 
 	log.Print("Everything works up to here!\n")
 
