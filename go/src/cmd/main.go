@@ -2,9 +2,33 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
+	"os"
+	"os/signal"
+
+	"github.com/hillu/go-yara"
 )
+
+func waitForInevitableHeatDeathOfTheUniverse() { //Or atleast until we receive a signal
+	log.Print("The heat death is coming. I can feel it in my bones!\n")
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+	<-signals
+	log.Print("Received interupt signal.\n")
+	return
+}
+
+func parse(matches chan []yara.MatchRule) {
+	//test code start
+	log.Print("Started parsing")
+	for m := range matches {
+		for _, match := range m {
+			log.Printf("Matched rule: %s\n", match.Rule)
+		}
+	}
+
+	//test code end
+}
 
 func main() {
 	var (
@@ -19,16 +43,23 @@ func main() {
 	}
 
 	scanner := compileRules(yaraRuleFiles)
+	inputStream := make(chan []byte, 20)           //20 items from pastebin should probably be more then enough, right?
+	matchStream := make(chan []yara.MatchRule, 20) //should probably match the number of inputs
 
-	fmt.Print("Everything works up to here!\n")
+	log.Print("Everything works up to here!\n")
 
-	matches, err := scanner.ScanProc(10342, 0, 0)
-	if err != nil {
-		log.Fatalf("Something went wrong while scanning the proc: %s", err)
-	}
-	log.Printf("Results = %d\n", len(matches))
-	for _, match := range matches {
-		log.Printf("+ [%s] %s", match.Namespace, match.Rule)
-	}
+	go scanInputs(scanner, inputStream, matchStream)
 
+	testInput1 := []byte("email@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\n")
+	inputStream <- testInput1
+	testInput2 := []byte("yolo swag bro\n")
+	inputStream <- testInput2
+
+	go parse(matchStream)
+
+	waitForInevitableHeatDeathOfTheUniverse()
+
+	close(inputStream)
+	close(matchStream)
+	log.Print("Leaving main.\n")
 }

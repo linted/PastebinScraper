@@ -66,3 +66,18 @@ func compileRules(files rules) *yara.Rules {
 
 	return scanner
 }
+
+func scanInputs(ruleSet *yara.Rules, inputs chan []byte, results chan []yara.MatchRule) {
+	log.Print("Starting to scan inputs\n")
+	for target := range inputs {
+		matches, err := ruleSet.ScanMem(target, 0, 5) //TODO: figure out what the flags do
+		if err != nil {
+			log.Printf("Got error while scanning: %s", err)
+		} else if len(matches) > 0 {
+			log.Print("Found a match\n")
+			results <- matches
+		} else {
+			log.Print("Not a match\n")
+		}
+	}
+}
