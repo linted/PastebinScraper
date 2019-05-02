@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 #build libyara
 cd libyara
 ./bootstrap.sh
