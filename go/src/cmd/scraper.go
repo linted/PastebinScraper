@@ -27,7 +27,7 @@ func getPaste(pasteID string, queue chan paste) {
 
 	resp, err := http.Get(fetchPath.string())
 	if err != nil {
-		log.Printf('Error while fetching %s: %s', pasteID, err)
+		log.Printf("Error while fetching %s: %s\n", pasteID, err)
 		return
 	}
 
@@ -36,7 +36,7 @@ func getPaste(pasteID string, queue chan paste) {
 
 	contents, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Printf("Error while trying to read response of %s: %s", pasteID, err)
+		log.Printf("Error while trying to read response of %s: %s\n", pasteID, err)
 		return
 	} 
 	
@@ -45,10 +45,24 @@ func getPaste(pasteID string, queue chan paste) {
 	return
 }
 
-func scrape(pasteQueue chan []byte) {
+func scrape(pasteQueue chan paste, stop chan bool) {
 	if fetechPathError != nil {
 		log.Panicf("Oh no! your pastebin url is messed up. check it! %s", fetechPathError)
 	}
-	log.Print("Starting to scrape!")
+	log.Print("Starting to scrape!\n")
 	
+	foreverLoop: for {
+		select {
+		case <- stop:
+			break foreverLoop //this breaks out of the for loop
+		default:
+			resp, err := http.Get(scrapePath)
+			if err != nil {
+				log.Print("Error while scraping: %s", err)
+			}
+			
+		}
+	}	
+
+	log.Print("Shutting down scrapper.\n")
 }

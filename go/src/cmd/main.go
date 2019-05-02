@@ -20,11 +20,11 @@ func waitForInevitableHeatDeathOfTheUniverse() { //Or atleast until we receive a
 	return
 }
 
-func parse(matches chan []yara.MatchRule) {
+func parse(matches chan pasteMatch) {
 	//test code start
 	log.Print("Started parsing")
 	for m := range matches {
-		for _, match := range m {
+		for _, match := range m.matches {
 			log.Printf("Matched rule: %s\n", match.Rule)
 		}
 	}
@@ -45,17 +45,14 @@ func main() {
 	}
 
 	scanner := compileRules(yaraRuleFiles)
-	inputStream := make(chan []byte, QUEUESIZE)           //queuesize items from pastebin should probably be more then enough, right?
-	matchStream := make(chan []yara.MatchRule, QUEUESIZE) //should probably match the number of inputs
+	inputStream := make(chan paste, QUEUESIZE)           //queuesize items from pastebin should probably be more then enough, right?
+	matchStream := make(chan pasteMatch, QUEUESIZE) //should probably match the number of inputs
 
 	log.Print("Everything works up to here!\n")
 
-	go scanInputs(scanner, inputStream, matchStream)
+	go scrape(inputStream)
 
-	testInput1 := []byte("email@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\nemail@email.email:password\r\n")
-	inputStream <- testInput1
-	testInput2 := []byte("yolo swag bro\n")
-	inputStream <- testInput2
+	go scanInputs(scanner, inputStream, matchStream)
 
 	go parse(matchStream)
 
