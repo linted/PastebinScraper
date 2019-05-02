@@ -61,8 +61,12 @@ func getPaste(pasteID string, queue chan paste) {
 	return
 }
 
-func filterRecent() error {
+func filterRecent(recent listings, previous map[string]listing) error {
 	
+	for _, newPaste := range recent {
+		
+	}
+
 }
 
 
@@ -81,11 +85,23 @@ func scrape(pasteQueue chan paste, stop chan bool) {
 		default:
 			resp, err := http.Get(scrapePath)
 			if err != nil {
-				log.Print("Error while scraping: %s", err)
+				log.Print("Error while scraping: %s\n", err)
+			}
+			
+			newListing := new(listings)
+			err := json.Unmarshal(resp, &newListing)
+			if err != nil {
+				log.Printf("Error while parsing the json: %s", err)
 			}
 
+			recentPastes, err := filterRecent(newListing, recentPastes)
+			if err != nil {
+				log.Printf("Error while compairing results\n")
+			}
 
-
+			for key, val := range recentPastes {
+				go getPaste(key, pasteQueue)
+			}
 		}
 	}	
 
