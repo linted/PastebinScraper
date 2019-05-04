@@ -5,11 +5,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
-
-	"github.com/hillu/go-yara"
 )
 
-var QUEUESIZE := 20
+var QUEUESIZE int = 20
 
 func waitForInevitableHeatDeathOfTheUniverse() { //Or atleast until we receive a signal
 	log.Print("The heat death is coming. I can feel it in my bones!\n")
@@ -45,12 +43,13 @@ func main() {
 	}
 
 	scanner := compileRules(yaraRuleFiles)
-	inputStream := make(chan paste, QUEUESIZE)           //queuesize items from pastebin should probably be more then enough, right?
+	inputStream := make(chan paste, QUEUESIZE)      //queuesize items from pastebin should probably be more then enough, right?
 	matchStream := make(chan pasteMatch, QUEUESIZE) //should probably match the number of inputs
+	stopFlag := make(chan bool)
 
 	log.Print("Everything works up to here!\n")
 
-	go scrape(inputStream)
+	go scrape(inputStream, stopFlag)
 
 	go scanInputs(scanner, inputStream, matchStream)
 
@@ -58,6 +57,8 @@ func main() {
 
 	waitForInevitableHeatDeathOfTheUniverse()
 
+	stopFlag <- false
+	close(stopFlag)
 	close(inputStream)
 	close(matchStream)
 	log.Print("Leaving main.\n")
