@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type paste struct {
@@ -29,9 +30,9 @@ type listing struct {
 type listings []listing
 
 var scrapeAmount = 30
-var pastebinURL = "https://pastebin.com"
-var scrapePath = fmt.Sprintf("%s/api_scraping.php?limit=%d", pastebinURL, scrapeAmount) //We don't change the limit, so compile it once and be done
-var fetchPath, fetechPathError = url.Parse(fmt.Sprintf("%s/api_scrape_item.php"))       //The query string on this one changes a lot so do it as needed
+var pastebinURL = "https://scrape.pastebin.com"
+var scrapePath = fmt.Sprintf("%s/api_scraping.php?limit=%d", pastebinURL, scrapeAmount)        //We don't change the limit, so compile it once and be done
+var fetchPath, fetechPathError = url.Parse(fmt.Sprintf("%s/api_scrape_item.php", pastebinURL)) //The query string on this one changes a lot so do it as needed
 
 func getPaste(currentPaste listing, queue chan paste) {
 	log.Printf("Fetching paste: %s", currentPaste.Key)
@@ -58,12 +59,15 @@ func getPaste(currentPaste listing, queue chan paste) {
 	return
 }
 
-func filterRecent(recent *listings, previous *map[string]listing) error {
-
-	// for _, newPaste := range recent {
-
-	// }
-	return nil
+func filterRecent(recent *listings, previous *map[string]listing) *map[string]listing {
+	newListings := make(map[string]listing)
+	for _, newPaste := range *recent {
+		//only add values that were not in the previous one
+		if _, ok := (*previous)[newPaste.Key]; !ok {
+			newListings[newPaste.Key] = newPaste
+		}
+	}
+	return &newListings
 }
 
 func scrape(pasteQueue chan paste, stop chan bool) {
@@ -96,18 +100,22 @@ foreverLoop:
 			newListing := new(listings)
 			err = json.Unmarshal(unparsedListing, &newListing)
 			if err != nil {
-				log.Printf("Error while parsing the json: %s", err)
+				log.Panicf("Error while parsing the json: %s\nurl = %s\ndata = %s", err, scrapePath, unparsedListing)
 				continue
 			}
 
-			err = filterRecent(newListing, &recentPastes)
-			if err != nil {
-				log.Printf("Error while compairing results\n")
-				continue
-			}
-
+			recentPastes = *filterRecent(newListing, &recentPastes)
+			log.Println("new listings = ", recentPastes)
 			for _, val := range recentPastes {
 				go getPaste(val, pasteQueue)
+			}
+
+			//sleeeeeeeeep
+			select {
+			case <-stop:
+				break foreverLoop //get out of this... lovely loop
+			case <-time.After(10000 * time.Millisecond):
+				continue
 			}
 		}
 	}

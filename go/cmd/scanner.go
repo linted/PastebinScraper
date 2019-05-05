@@ -78,7 +78,7 @@ func scanInputs(ruleSet *yara.Rules, inputs chan paste, results chan pasteMatch)
 		if err != nil {
 			log.Printf("Got error while scanning: %s", err)
 		} else if len(matches) > 0 {
-			log.Print("Found a match\n")
+			log.Print("Found a match!!!!\n")
 			results <- pasteMatch{target.pasteID, matches}
 		} else {
 			log.Print("Not a match\n")
