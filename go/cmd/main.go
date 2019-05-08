@@ -23,7 +23,7 @@ func parse(matches chan pasteMatch) {
 	log.Print("Started parsing")
 	for m := range matches {
 		for _, match := range m.matches {
-			log.Printf("Matched rule: %s\n", match.Rule)
+			log.Printf("Matched rule: %s\n%s matches %s\n", m.current.pasteID, m.current.title, match.Rule)
 		}
 	}
 
@@ -33,9 +33,11 @@ func parse(matches chan pasteMatch) {
 func main() {
 	var (
 		yaraRuleFiles rules
+		slackURL      slackConfig
 	)
 
 	flag.Var(&yaraRuleFiles, "rule", "Add yara rule")
+	flag.Var(&slackURL, "config", "config file for slack integration")
 	flag.Parse()
 
 	if len(yaraRuleFiles) == 0 {

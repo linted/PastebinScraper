@@ -12,7 +12,7 @@ import (
 type rule struct{ namespace, filename string }
 type rules []rule
 type pasteMatch struct {
-	pasteID string
+	current paste
 	matches []yara.MatchRule
 }
 
@@ -79,7 +79,7 @@ func scanInputs(ruleSet *yara.Rules, inputs chan paste, results chan pasteMatch)
 			log.Printf("Got error while scanning: %s", err)
 		} else if len(matches) > 0 {
 			log.Print("Found a match!!!!\n")
-			results <- pasteMatch{target.pasteID, matches}
+			results <- pasteMatch{target, matches}
 		} else {
 			log.Print("Not a match\n")
 		}

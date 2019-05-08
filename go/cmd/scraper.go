@@ -12,6 +12,7 @@ import (
 
 type paste struct {
 	pasteID  string
+	title    string
 	contents []byte
 }
 
@@ -55,7 +56,7 @@ func getPaste(currentPaste listing, queue chan paste) {
 		return
 	}
 
-	queue <- paste{currentPaste.Key, contents}
+	queue <- paste{currentPaste.Key, currentPaste.Title, contents}
 	return
 }
 
@@ -113,6 +114,7 @@ foreverLoop:
 			//sleeeeeeeeep
 			select {
 			case <-stop:
+				log.Print("Shutting down scrapper!\n")
 				break foreverLoop //get out of this... lovely loop
 			case <-time.After(10000 * time.Millisecond):
 				continue
