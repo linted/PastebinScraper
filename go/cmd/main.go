@@ -42,6 +42,8 @@ func main() {
 
 	if len(yaraRuleFiles) == 0 {
 		log.Fatal("No rules provided\n")
+	} else if len(slackURL.endpointURL) == 0 {
+		log.Fatal("No config file supplied\n")
 	}
 
 	scanner := compileRules(yaraRuleFiles)
@@ -55,7 +57,7 @@ func main() {
 
 	go scanInputs(scanner, inputStream, matchStream)
 
-	go parse(matchStream)
+	go postToSlack(matchStream, slackURL)
 
 	waitForInevitableHeatDeathOfTheUniverse()
 
