@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 )
 
 type slackConfig struct {
@@ -21,18 +23,13 @@ func (s *slackConfig) Set(arg string) error {
 	if len(s.endpointURL) > 0 {
 		return errors.New("config flag already set")
 	}
-	fin, err := os.Open(arg)
+
+	slackURL, err := ioutil.ReadFile(arg)
 	if err != nil {
-		return fmt.Errorf("unable to open config file: %s", err)
+		log.Panicf("Error while reading in config: %s", err)
 	}
 
-	var slackURL [80]byte
-	len, err := fin.Read(slackURL[:])
-	if err != nil && len > 0 {
-		return fmt.Errorf("error while getting url from config: %s", err)
-	}
-
-	tmpURL, err := url.Parse(string(slackURL[:]))
+	tmpURL, err := url.Parse(string(slackURL))
 	if err != nil {
 		return fmt.Errorf("error while trying to parse url from config: %s", err)
 	}
@@ -43,16 +40,27 @@ func (s *slackConfig) Set(arg string) error {
 func postToSlack(sendQueue chan pasteMatch, config slackConfig) {
 	log.Print("Started slackbot!\n")
 
-	payload := map[string]string{"text": nil}
+	payload := map[string]string{"text": ""}
 
 	for next := range sendQueue {
-		var matchingRules []string
+		var matchingRules string
 		for _, match := range next.matches {
-			matchingRules.Append(match.Rule)
+			matchingRules += match.Rule
 		}
-		payload["text"] = fmt.Sprintf("Pastebin Match\nURL: https://pastebin.com/%s\nMatches: %s", next.current)
-		http.Post(config.endpointURL, "application/json")
+		payload["text"] = fmt.Sprintf("Pastebin Match\nURL: https://pastebin.com/%s\nMatches: %s", next.current.pasteID, matchingRules)
 
+		contents, err := json.Marshal(payload)
+		if err != nil {
+			log.Printf("Error while marshaling contents: %s", err)
+			continue
+		}
+		log.Printf("Sending message: %s", contents)
+		resp, err := http.Post(config.endpointURL, "application/json", bytes.NewBuffer(contents))
+		if err != nil {
+			log.Printf("Error while sending! %s", err)
+			continue
+		}
+		log.Printf("Resp = %s", resp.Status)
 	}
 
 	log.Printf("Stopped slackbot\n")

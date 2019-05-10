@@ -80,8 +80,8 @@ func scanInputs(ruleSet *yara.Rules, inputs chan paste, results chan pasteMatch)
 		} else if len(matches) > 0 {
 			log.Print("Found a match!!!!\n")
 			results <- pasteMatch{target, matches}
-		} else {
-			log.Print("Not a match\n")
-		}
+		} //else {
+		// 	log.Print("Not a match\n")
+		// }
 	}
 }

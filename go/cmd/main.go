@@ -51,7 +51,7 @@ func main() {
 	matchStream := make(chan pasteMatch, QUEUESIZE) //should probably match the number of inputs
 	stopFlag := make(chan bool)
 
-	log.Print("Everything works up to here!\n")
+	log.Printf("sending to URL: %s\n", slackURL)
 
 	go scrape(inputStream, stopFlag)
 

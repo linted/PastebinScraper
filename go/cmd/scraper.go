@@ -36,7 +36,7 @@ var scrapePath = fmt.Sprintf("%s/api_scraping.php?limit=%d", pastebinURL, scrape
 var fetchPath, fetechPathError = url.Parse(fmt.Sprintf("%s/api_scrape_item.php", pastebinURL)) //The query string on this one changes a lot so do it as needed
 
 func getPaste(currentPaste listing, queue chan paste) {
-	log.Printf("Fetching paste: %s", currentPaste.Key)
+	//log.Printf("Fetching paste: %s", currentPaste.Key)
 	u := url.Values{}
 	u.Add("i", currentPaste.Key)
 	fetchPath.RawQuery = u.Encode()
@@ -60,15 +60,18 @@ func getPaste(currentPaste listing, queue chan paste) {
 	return
 }
 
-func filterRecent(recent *listings, previous *map[string]listing) *map[string]listing {
+func filterRecent(recent *listings, previous *map[string]struct{}) (*map[string]listing, *map[string]struct{}) {
 	newListings := make(map[string]listing)
+	curListings := make(map[string]struct{})
+	var empty struct{}
 	for _, newPaste := range *recent {
 		//only add values that were not in the previous one
 		if _, ok := (*previous)[newPaste.Key]; !ok {
 			newListings[newPaste.Key] = newPaste
 		}
+		curListings[newPaste.Key] = empty
 	}
-	return &newListings
+	return &newListings, &curListings
 }
 
 func scrape(pasteQueue chan paste, stop chan bool) {
@@ -77,7 +80,8 @@ func scrape(pasteQueue chan paste, stop chan bool) {
 	}
 	log.Print("Starting to scrape!\n")
 
-	recentPastes := make(map[string]listing)
+	var recentPastes *map[string]struct{}
+	var newPastes *map[string]listing
 
 foreverLoop:
 	for {
@@ -105,9 +109,9 @@ foreverLoop:
 				continue
 			}
 
-			recentPastes = *filterRecent(newListing, &recentPastes)
-			log.Println("new listings = ", recentPastes)
-			for _, val := range recentPastes {
+			newPastes, recentPastes = filterRecent(newListing, recentPastes)
+			log.Println("new listings = ", newPastes)
+			for _, val := range *newPastes {
 				go getPaste(val, pasteQueue)
 			}
 
