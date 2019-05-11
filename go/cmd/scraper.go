@@ -64,13 +64,22 @@ func filterRecent(recent *listings, previous *map[string]struct{}) (*map[string]
 	newListings := make(map[string]listing)
 	curListings := make(map[string]struct{})
 	var empty struct{}
-	for _, newPaste := range *recent {
-		//only add values that were not in the previous one
-		if _, ok := (*previous)[newPaste.Key]; !ok {
+
+	if previous == nil {
+		for _, newPaste := range *recent {
 			newListings[newPaste.Key] = newPaste
+			curListings[newPaste.Key] = empty
 		}
-		curListings[newPaste.Key] = empty
+	} else {
+		for _, newPaste := range *recent {
+			//only add values that were not in the previous one
+			if _, ok := (*previous)[newPaste.Key]; !ok {
+				newListings[newPaste.Key] = newPaste
+			}
+			curListings[newPaste.Key] = empty
+		}
 	}
+
 	return &newListings, &curListings
 }
 
@@ -110,7 +119,7 @@ foreverLoop:
 			}
 
 			newPastes, recentPastes = filterRecent(newListing, recentPastes)
-			log.Println("new listings = ", newPastes)
+			log.Printf("new listings = %d", len(*newPastes))
 			for _, val := range *newPastes {
 				go getPaste(val, pasteQueue)
 			}

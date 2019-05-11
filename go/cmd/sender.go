@@ -45,7 +45,10 @@ func postToSlack(sendQueue chan pasteMatch, config slackConfig) {
 	for next := range sendQueue {
 		var matchingRules string
 		for _, match := range next.matches {
-			matchingRules += match.Rule
+			matchingRules += match.Rule + " "
+			// for _, matchString := range match.Strings {
+			// 	log.Print(string(matchString.Data))
+			// }
 		}
 		payload["text"] = fmt.Sprintf("Pastebin Match\nURL: https://pastebin.com/%s\nMatches: %s", next.current.pasteID, matchingRules)
 
