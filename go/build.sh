@@ -3,7 +3,7 @@ set -e
 #build libyara
 cd libyara
 ./bootstrap.sh
-./configure --disable-shared --enable-static --without-crypto
+./configure --disable-shared --enable-static #--enable-magic
 if [[ $1 = "-c" ]]; then
     make clean
 fi
