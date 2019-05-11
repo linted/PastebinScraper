@@ -50,7 +50,7 @@ func postToSlack(sendQueue chan pasteMatch, config slackConfig) {
 			// 	log.Print(string(matchString.Data))
 			// }
 		}
-		payload["text"] = fmt.Sprintf("Pastebin Match\nURL: https://pastebin.com/%s\nMatches: %s", next.current.pasteID, matchingRules)
+		payload["text"] = fmt.Sprintf("Pastebin Match\nURL: https://pastebin.com/%s\nTitle: %s\nMatches: %s", next.current.pasteID, next.current.title, matchingRules)
 
 		contents, err := json.Marshal(payload)
 		if err != nil {
