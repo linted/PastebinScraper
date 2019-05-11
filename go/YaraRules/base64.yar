@@ -10,8 +10,8 @@ rule b64_exe
         reference = "https://github.com/kevthehermit/PasteHunter"
 
     strings:
-        $b64_exe = /\bTV(oA|pB|pQ|qA|qQ|ro)/
-        // Double b64 = VFZxUU
+        $b64_exe = /TV(oA|pB|pQ|qA|qQ|ro)/
+        // Double_b64 = VFZxUU
     condition:
         $b64_exe at 0
 
@@ -157,4 +157,17 @@ rule b64_xml_doc
     condition:
         $b64_xml at 0 and 3 of ($docx*)
 
+}
+
+rule contentis_base64 : Base64
+{
+    meta:
+        author = "Jaume Martin"
+        description = "This rule finds for base64 strings"
+        version = "0.2"
+        notes = "https://github.com/Yara-Rules/rules/issues/153"
+    strings:
+        $a = /([A-Za-z0-9+\/]{4}){3,}([A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?/
+    condition:
+        $a
 }
