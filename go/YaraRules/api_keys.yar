@@ -47,8 +47,11 @@ rule google_api
 
     strings:
         $a = /\bAIza.{35}\b/
+        $extm3u = /#EXTM3U/
+        $etxinf = /#ETXINF/
+        $extinf = /#EXTINF/
     condition:
-        any of them
+        $a and not ($extm3u or $etxinf or $extinf)
 }
 
 rule slack_api

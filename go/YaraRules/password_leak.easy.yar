@@ -11,20 +11,15 @@ rule email_list
 
     strings:
         $email_add = /\b[\w\.-]+@[\w\.-]+\.\w+\b/
-    condition:
-        #email_add >= 5
-
-}
-
-rule email_better_list
-{
-    meta:
-        author = "@linted"
-    strings:
         $email = /\b((([!#$%&'*+\-\/=?^`{|}~\w])|([!#$%&'*+\-\/=?^`{|}~\w][!#$%&'*+\-\/=?^`{|}~\.\w]{0,}[!#$%&'*+\-\/=?^`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)\b/
+        $extm3u = /#EXTM3U/
+        $etxinf = /#ETXINF/
+        $extinf = /#EXTINF/
     condition:
-        #email >= 4
+        (#email_add >= 5 or #email >= 4) and not ($extm3u or $etxinf or $extinf)
+
 }
+
 
 /*
 rule password_list
