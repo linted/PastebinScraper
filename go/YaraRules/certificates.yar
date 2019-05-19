@@ -17,7 +17,6 @@ rule certificates
         $pgp_priv = "BEGIN PGP PRIVATE KEY" wide ascii nocase
         $pem_cert = "BEGIN CERTIFICATE" wide ascii nocase
         $pkcs7 = "BEGIN PKCS7"
-        $ssh_rsa = "ssh-rsa"
 
     condition:
         any of them

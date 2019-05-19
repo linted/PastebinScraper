@@ -11,12 +11,26 @@ rule email_list
 
     strings:
         $email_add = /\b[\w\.-]+@[\w\.-]+\.\w+\b/
-        $email = /\b((([!#$%&'*+\-\/=?^`{|}~\w])|([!#$%&'*+\-\/=?^`{|}~\w][!#$%&'*+\-\/=?^`{|}~\.\w]{0,}[!#$%&'*+\-\/=?^`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)\b/
+        //$email = /\b((([!#$%&'*+\-\/=?^`{|}~\w])|([!#$%&'*+\-\/=?^`{|}~\w][!#$%&'*+\-\/=?^`{|}~\.\w]{0,}[!#$%&'*+\-\/=?^`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)\b/
         $extm3u = /#EXTM3U/
         $etxinf = /#ETXINF/
         $extinf = /#EXTINF/
     condition:
-        (#email_add >= 5 or #email >= 4) and not ($extm3u or $etxinf or $extinf)
+        (#email_add >= 5) and not ($extm3u or $etxinf or $extinf)
+
+}
+
+rule password_dump
+{
+    meta:
+        author = "@linted"
+    strings:
+        $password = /[\w\.-]+@[\w\.-]+\.\w+[:|][\w\.-]+/
+        $extm3u = /#EXTM3U/
+        $etxinf = /#ETXINF/
+        $extinf = /#EXTINF/
+    condition:
+        (#password >= 1) and not ($extm3u or $etxinf or $extinf)
 
 }
 

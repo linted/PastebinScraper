@@ -159,6 +159,7 @@ rule b64_xml_doc
 
 }
 
+/*
 rule contentis_base64 : Base64
 {
     meta:
@@ -171,3 +172,4 @@ rule contentis_base64 : Base64
     condition:
         $a
 }
+*/
