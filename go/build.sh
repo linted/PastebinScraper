@@ -14,7 +14,7 @@ cd ..
 export GOPATH=$(pwd):$GOPATH
 export export PKG_CONFIG_PATH=$(pwd)/libyara/libyara/:$(go env PKG_CONFIG_PATH)
 export CGO_CFLAGS="-I$(pwd)/libyara/libyara/include/ $(go env CGO_CFLAGS)" 
-export CGO_LDFLAGS="-L$(pwd)/libyara/libyara/.libs -lm $(go env CGO_LDFLAGS)"
+export CGO_LDFLAGS="-L$(pwd)/libyara/libyara/.libs -lm $(go env CGO_LDFLAGS) -lcrypto"
 go get github.com/hillu/go-yara
 if [ $? -ne 0 ]; then
     echo "__________________________BUILD ERROR__________________________"
