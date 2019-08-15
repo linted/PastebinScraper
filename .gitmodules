@@ -1,0 +1,3 @@
+[submodule "go/libyara"]
+	path = go/libyara
+	url = https://github.com/VirusTotal/yara.git
