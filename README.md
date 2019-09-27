@@ -18,3 +18,7 @@ Next, from the go dir, run:
 ./main -rule YaraRules/certificates.yar -config slack.conf
 
 Then sit back and watch the pastes come flooding in!
+
+# Special thanks
+Thanks to @kevtehhermit for some of the great yara rules for scraping pastebin.
+https://github.com/kevthehermit/PasteHunter
