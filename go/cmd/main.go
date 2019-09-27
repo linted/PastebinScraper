@@ -7,7 +7,7 @@ import (
 	"os/signal"
 )
 
-var QUEUESIZE int = 20
+var queueSize = 20
 
 func waitForInevitableHeatDeathOfTheUniverse() { //Or atleast until we receive a signal
 	log.Print("The heat death is coming. I can feel it in my bones!\n")
@@ -47,8 +47,8 @@ func main() {
 	}
 
 	scanner := compileRules(yaraRuleFiles)
-	inputStream := make(chan paste, QUEUESIZE)      //queuesize items from pastebin should probably be more then enough, right?
-	matchStream := make(chan pasteMatch, QUEUESIZE) //should probably match the number of inputs
+	inputStream := make(chan paste, queueSize)      //queueSize items from pastebin should probably be more then enough, right?
+	matchStream := make(chan pasteMatch, queueSize) //should probably match the number of inputs
 	stopFlag := make(chan bool)
 
 	log.Printf("Slack URL: %s\n", slackURL)

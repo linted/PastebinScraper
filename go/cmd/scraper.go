@@ -32,8 +32,8 @@ type listings []listing
 
 var scrapeAmount = 30
 var pastebinURL = "https://scrape.pastebin.com"
-var scrapePath = fmt.Sprintf("%s/api_scraping.php?limit=%d", pastebinURL, scrapeAmount)        //We don't change the limit, so compile it once and be done
-var fetchPath, fetechPathError = url.Parse(fmt.Sprintf("%s/api_scrape_item.php", pastebinURL)) //The query string on this one changes a lot so do it as needed
+var scrapePath = fmt.Sprintf("%s/api_scraping.php?limit=%d", pastebinURL, scrapeAmount)       //We don't change the limit, so compile it once and be done
+var fetchPath, fetchPathError = url.Parse(fmt.Sprintf("%s/api_scrape_item.php", pastebinURL)) //The query string on this one changes a lot so do it as needed
 
 func getPaste(currentPaste listing, queue chan paste) {
 	//log.Printf("Fetching paste: %s", currentPaste.Key)
@@ -84,8 +84,8 @@ func filterRecent(recent *listings, previous *map[string]struct{}) (*map[string]
 }
 
 func scrape(pasteQueue chan paste, stop chan bool) {
-	if fetechPathError != nil {
-		log.Panicf("Oh no! your pastebin url is messed up. check it! %s", fetechPathError)
+	if fetchPathError != nil {
+		log.Panicf("Oh no! your pastebin url is messed up. check it! %s", fetchPathError)
 	}
 	log.Print("Starting to scrape!\n")
 
