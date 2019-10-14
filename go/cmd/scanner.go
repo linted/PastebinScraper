@@ -54,6 +54,7 @@ func compileRules(files rules) *yara.Rules {
 
 	for _, ruleFile := range files {
 		f, err := os.Open(ruleFile.filename)
+		defer f.Close()
 		if err != nil {
 			log.Fatalf("Could not open rule file %s: %s", ruleFile.filename, err)
 		}
