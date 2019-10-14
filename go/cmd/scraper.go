@@ -103,13 +103,14 @@ foreverLoop:
 				log.Print("Error while scraping: %s\n", err)
 				continue
 			}
-			defer resp.Body.Close()
 
 			unparsedListing, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				log.Printf("Error while tyring to read response body: %s\n", err)
 				continue
 			}
+
+			resp.Body.Close() // Make sure to clean up
 
 			newListing := new(listings)
 			err = json.Unmarshal(unparsedListing, &newListing)
