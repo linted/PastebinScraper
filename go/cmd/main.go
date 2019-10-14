@@ -18,18 +18,6 @@ func waitForInevitableHeatDeathOfTheUniverse() { //Or atleast until we receive a
 	return
 }
 
-func parse(matches chan pasteMatch) {
-	//test code start
-	log.Print("Started parsing")
-	for m := range matches {
-		for _, match := range m.matches {
-			log.Printf("Matched rule: %s\n%s matches %s\n", m.current.pasteID, m.current.title, match.Rule)
-		}
-	}
-
-	//test code end
-}
-
 func main() {
 	var (
 		yaraRuleFiles rules
