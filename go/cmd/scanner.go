@@ -54,10 +54,10 @@ func compileRules(files rules) *yara.Rules {
 
 	for _, ruleFile := range files {
 		f, err := os.Open(ruleFile.filename)
-		defer f.Close()
 		if err != nil {
 			log.Fatalf("Could not open rule file %s: %s", ruleFile.filename, err)
 		}
+		defer f.Close()
 		err = compiler.AddFile(f, ruleFile.namespace)
 		if err != nil {
 			log.Fatalf("Could not parse rule file %s: %s", ruleFile.filename, err)
