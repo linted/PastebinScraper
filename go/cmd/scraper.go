@@ -36,7 +36,7 @@ var fetchPath = fmt.Sprintf("%s/api_scrape_item.php?i=", pastebinURL)           
 
 func getPaste(currentPaste listing, queue chan paste) {
 	//log.Printf("Fetching paste: %s", currentPaste.Key)
-	queryString = fmt.Sprintf("%s%s", fetchPath, currentPaste.Key)
+	queryString := fmt.Sprintf("%s%s", fetchPath, currentPaste.Key)
 
 	resp, err := http.Get(queryString)
 	if err != nil {
@@ -81,9 +81,6 @@ func filterRecent(recent *listings, previous *map[string]struct{}) (*map[string]
 }
 
 func scrape(pasteQueue chan paste, stop chan bool) {
-	if fetchPathError != nil {
-		log.Panicf("Oh no! your pastebin url is messed up. check it! %s", fetchPathError)
-	}
 	log.Print("Starting to scrape!\n")
 
 	var recentPastes *map[string]struct{}
