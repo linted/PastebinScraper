@@ -64,6 +64,7 @@ func postToSlack(sendQueue chan pasteMatch, config slackConfig) {
 			continue
 		}
 		log.Printf("Resp = %s", resp.Status)
+		resp.Body.Close()
 	}
 
 	log.Printf("Stopped slackbot\n")
