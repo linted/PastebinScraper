@@ -15,10 +15,13 @@ export GOPATH=$(pwd):$GOPATH
 export export PKG_CONFIG_PATH=$(pwd)/libyara/libyara/:$(go env PKG_CONFIG_PATH)
 export CGO_CFLAGS="-I$(pwd)/libyara/libyara/include/ $(go env CGO_CFLAGS)" 
 export CGO_LDFLAGS="-L$(pwd)/libyara/libyara/.libs -lm $(go env CGO_LDFLAGS) -lcrypto"
-go get github.com/hillu/go-yara
+go get -tags yara_static github.com/hillu/go-yara
+echo "running go-yara tests"
+go test github.com/hillu/go-yara
 if [ $? -ne 0 ]; then
     echo "__________________________BUILD ERROR__________________________"
     go env
 fi
 
-go build cmd/*.go
+go build -race cmd/*.go
+echo "Done"
