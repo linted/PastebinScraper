@@ -2,14 +2,17 @@ package main
 
 var senderFuncs = []func(chan pasteMatch){
 	postToSlack,
+	postToElastic,
 }
 
 var registerFuncs = []func(){
 	registerSlackFlags,
+	registerElasticFlags,
 }
 
 var validationFuncs = []func(){
 	validateSlackFlags,
+	validateElasticFlags,
 }
 
 func registerSenderFlags() {
