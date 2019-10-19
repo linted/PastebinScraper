@@ -24,17 +24,17 @@ func (s *slackConfig) String() string {
 
 func (s *slackConfig) Set(arg string) error {
 	if len(s.endpointURL) > 0 {
-		return errors.New("config flag already set")
+		return errors.New("slack config flag already set")
 	}
 
 	slackURL, err := ioutil.ReadFile(arg)
 	if err != nil {
-		log.Panicf("Error while reading in config: %s", err)
+		log.Panicf("failed while reading in config: %s", err)
 	}
 
 	tmpURL, err := url.Parse(string(slackURL))
 	if err != nil {
-		return fmt.Errorf("error while trying to parse url from config: %s", err)
+		return fmt.Errorf("failed trying to parse slack url from config file: %s", err)
 	}
 	s.endpointURL = tmpURL.String()
 	return nil
