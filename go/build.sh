@@ -23,5 +23,5 @@ if [ $? -ne 0 ]; then
     go env
 fi
 
-go build -race cmd/*.go
+go build -o scraper -race cmd/*.go
 echo "Done"
