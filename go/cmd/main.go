@@ -8,6 +8,7 @@ import (
 )
 
 var queueSize = 20
+var stopFlag = make(chan bool)
 
 func waitForInevitableHeatDeathOfTheUniverse() { //Or atleast until we receive a signal
 	log.Print("The heat death is coming. I can feel it in my bones!\n")
@@ -21,23 +22,20 @@ func waitForInevitableHeatDeathOfTheUniverse() { //Or atleast until we receive a
 func main() {
 	var (
 		yaraRuleFiles rules
-		slackURL      slackConfig
 	)
 
 	flag.Var(&yaraRuleFiles, "rule", "Add yara rule")
-	flag.Var(&slackURL, "config", "config file for slack integration")
+	registerSenderFlags()
 	flag.Parse()
 
 	if len(yaraRuleFiles) == 0 {
 		log.Fatal("No rules provided\n")
-	} else if len(slackURL.endpointURL) == 0 {
-		log.Fatal("No config file supplied\n")
 	}
+	validateSenderFlags()
 
 	scanner := compileRules(yaraRuleFiles)
 	inputStream := make(chan paste, queueSize)      //queueSize items from pastebin should probably be more then enough, right?
 	matchStream := make(chan pasteMatch, queueSize) //should probably match the number of inputs
-	stopFlag := make(chan bool)
 
 	log.Printf("Slack URL: %s\n", slackURL)
 
@@ -45,7 +43,7 @@ func main() {
 
 	go scanInputs(scanner, inputStream, matchStream)
 
-	go postToSlack(matchStream, slackURL)
+	go startSending(matchStream)
 
 	waitForInevitableHeatDeathOfTheUniverse()
 

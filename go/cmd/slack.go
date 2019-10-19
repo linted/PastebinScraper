@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 )
+
+var slackURL slackConfig
 
 type slackConfig struct {
 	endpointURL string
@@ -37,7 +40,17 @@ func (s *slackConfig) Set(arg string) error {
 	return nil
 }
 
-func postToSlack(sendQueue chan pasteMatch, config slackConfig) {
+func registerSlackFlags() {
+	flag.Var(&slackURL, "slack", "config file for slack integration")
+}
+
+func validateSlackFlags() {
+	if len(slackURL.endpointURL) == 0 {
+		log.Fatal("No Slack config file supplied\n") // TODO: make not fatal
+	}
+}
+
+func postToSlack(sendQueue chan pasteMatch) {
 	log.Print("Started slackbot!\n")
 
 	payload := map[string]string{"text": ""}
@@ -58,7 +71,7 @@ func postToSlack(sendQueue chan pasteMatch, config slackConfig) {
 			continue
 		}
 		log.Printf("Sending message: %s", contents)
-		resp, err := http.Post(config.endpointURL, "application/json", bytes.NewBuffer(contents))
+		resp, err := http.Post(slackURL.endpointURL, "application/json", bytes.NewBuffer(contents))
 		if err != nil {
 			log.Printf("Error while sending! %s", err)
 			continue
