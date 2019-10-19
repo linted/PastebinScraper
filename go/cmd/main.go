@@ -37,8 +37,6 @@ func main() {
 	inputStream := make(chan paste, queueSize)      //queueSize items from pastebin should probably be more then enough, right?
 	matchStream := make(chan pasteMatch, queueSize) //should probably match the number of inputs
 
-	log.Printf("Slack URL: %s\n", slackURL)
-
 	go scrape(inputStream, stopFlag)
 
 	go scanInputs(scanner, inputStream, matchStream)
