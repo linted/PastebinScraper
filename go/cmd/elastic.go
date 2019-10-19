@@ -2,11 +2,14 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/url"
 )
+
+var elasticURL elasticConfig
 
 type elasticConfig struct {
 	endpointURL string
@@ -32,4 +35,18 @@ func (s *elasticConfig) Set(arg string) error {
 	}
 	s.endpointURL = tmpURL.String()
 	return nil
+}
+
+func registerElasticFlags() {
+	flag.Var(&elasticURL, "elastic", "config file for elastic integration")
+}
+
+func validateElasticFlags() {
+	if len(elasticURL.endpointURL) == 0 {
+		log.Fatal("No Elastic config file supplied\n") // TODO: make not fatal
+	}
+}
+
+func postToElastic(sendQueue chan pasteMatch) {
+	log.Println("Starting Elastic logging")
 }
