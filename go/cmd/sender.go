@@ -17,7 +17,7 @@ type slackConfig struct {
 }
 
 func (s *slackConfig) String() string {
-	return strings.Trimspace(s.endpointURL)
+	return strings.TrimSpace(s.endpointURL)
 }
 
 func (s *slackConfig) Set(arg string) error {
