@@ -50,7 +50,7 @@ def main():
     try:
         server = setup_email(args.send_email, password, args.smtp_server)
     except Exception as e:
-        print("Error during smtp setup [{}]: {}".format(type(e), e))
+        print("[-] Error during smtp setup [{}]: {}".format(type(e), e))
         return
 
     old_listing = set()
@@ -100,10 +100,10 @@ def get_updates():
                 ret.add(items["key"])
         except Exception as e:
             print(
-                "Error while decoding json"
+                "[-] Error while decoding json"
             )  # yeah this falls through and we request all of the only things again
     else:
-        print("Error: HTTP returned status code: {}".format(listing.status_code))
+        print("[-] Error: HTTP returned status code: {}".format(listing.status_code))
 
     return ret
 
@@ -129,7 +129,7 @@ def get_paste(paste_id):
         if paste.status_code == 200:
             return paste.text
     except Exception as e:
-        print("Connection error: {}".format(e))
+        print("[-] Connection error: {}".format(e))
     return None  # we get here if any kind of error occurred
 
 
@@ -163,14 +163,9 @@ def send_results(results, connection_info):
             print("Sent email")
             retry = 0
         except smtplib.SMTPDataError as e:
-            print(
-                "Error while sending{}: {}\n send_email = {}\n recv_email = {}".format(
-                    type(e),
-                    e,
-                    connection_info["send_email"],
-                    connection_info["recv_email"],
-                )
-            )
+            print("[-] Error while sending{}: {}".format(type(e), e)
+            print("send_email = {}".format(connection_info["send_email"])
+            print("recv_email = {}".format(connection_info["recv_email"])
             print("message = {}\n-------".format(current_message))
         except smtplib.SMTPResponseException:
             print("Reconnecting to SMTP server")
