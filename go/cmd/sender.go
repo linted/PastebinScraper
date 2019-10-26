@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type slackConfig struct {
@@ -16,7 +17,7 @@ type slackConfig struct {
 }
 
 func (s *slackConfig) String() string {
-	return s.endpointURL
+	return strings.TrimSpace(s.endpointURL)
 }
 
 func (s *slackConfig) Set(arg string) error {
