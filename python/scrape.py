@@ -176,12 +176,12 @@ def send_results(results, connection_info):
     GLOBAL_MUTEX.release()
 
 
-def setup_email(email, password, server):
+def setup_email(email_address, password, server):
     global smtp_server
     context = ssl.create_default_context()
     smtp_server = smtplib.SMTP(server, 587)
     smtp_server.starttls(context=context)
-    smtp_server.login(email, password)
+    smtp_server.login(email_address, password)
     return server
 
 
