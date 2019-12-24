@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"os"
@@ -44,6 +45,33 @@ func (r *rules) String() string {
 		s += rule.filename
 	}
 	return s
+}
+
+func (p *pasteMatch) MarshalJSON() ([]byte, error) {
+
+	log.Printf("Starting marshal on paste %s\n", p.current.pasteID)
+
+	matchList := make([]string, len(p.matches))
+	for i, match := range p.matches {
+		matchList[i] = match.Rule
+	}
+
+	data := map[string]interface{}{
+		"Title":    p.current.title,
+		"PasteID":  p.current.pasteID,
+		"Contents": p.current.contents,
+		"Matches":  matchList,
+	}
+
+	result, err := json.Marshal(data)
+	if err != nil {
+		log.Println("Error while marshaling %s", p.current.pasteID)
+		return nil, err
+	}
+
+	log.Printf("Marshaled => %s\n", result)
+
+	return result, nil
 }
 
 func compileRules(files rules) *yara.Rules {
