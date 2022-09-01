@@ -124,7 +124,7 @@ func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 			matchingRules += "[" + match.Rule + "]"
 		}
 
-		message = fmt.Sprintf("%s %s: https://pastebin.com/%s", matchingRules, next.current.title, next.current.pasteID)
+		var message = fmt.Sprintf("%s %s: https://pastebin.com/%s", matchingRules, next.current.title, next.current.pasteID)
 
 		_, err = dg.ChannelMessageSend(config.channel, message)
 		if err != nil {
