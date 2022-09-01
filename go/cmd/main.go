@@ -32,9 +32,9 @@ func main() {
 
 	if len(yaraRuleFiles) == 0 {
 		log.Fatal("No rules provided\n")
-	} else if len(slackURL.endpointURL) == 0 && len(discordConf) == 0 {
+	} else if len(slackURL.endpointURL) == 0 && (len(discordConf.token) == 0 || len(discordConf.channel) == 0) {
 		log.Fatal("No config file supplied\n")
-	} else if len(slackURL.endpointURL) != 0 && len(discordConf) != 0 {
+	} else if len(slackURL.endpointURL) != 0 && ( len(discordConf.token) != 0 || len(discordConf.channel) != 0){
 		log.Fatal("Slack or Discord. Not both, sorry!")
 	}
 
