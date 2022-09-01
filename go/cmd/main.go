@@ -22,16 +22,20 @@ func main() {
 	var (
 		yaraRuleFiles rules
 		slackURL      slackConfig
+		discordConf   discordConfig
 	)
 
 	flag.Var(&yaraRuleFiles, "rule", "Add yara rule")
-	flag.Var(&slackURL, "config", "config file for slack integration")
+	flag.Var(&slackURL, "slack", "config file for slack integration")
+	flag.Var(&discordConf, "discord", "config file for discord")
 	flag.Parse()
 
 	if len(yaraRuleFiles) == 0 {
 		log.Fatal("No rules provided\n")
-	} else if len(slackURL.endpointURL) == 0 {
+	} else if len(slackURL.endpointURL) == 0 && len(discordConf) == 0 {
 		log.Fatal("No config file supplied\n")
+	} else if len(slackURL.endpointURL) != 0 && len(discordConf) != 0 {
+		log.Fatal("Slack or Discord. Not both, sorry!")
 	}
 
 	scanner := compileRules(yaraRuleFiles)
@@ -39,13 +43,17 @@ func main() {
 	matchStream := make(chan pasteMatch, queueSize) //should probably match the number of inputs
 	stopFlag := make(chan bool)
 
-	log.Printf("Slack URL: %s\n", slackURL)
-
 	go scrape(inputStream, stopFlag)
 
 	go scanInputs(scanner, inputStream, matchStream)
 
-	go postToSlack(matchStream, slackURL)
+	if len(slackURL.endpointURL) != 0 {
+		log.Printf("Slack URL: %s\n", slackURL)
+		go postToSlack(matchStream, slackURL)
+	} else {
+		go postToDiscord(matchStream, discordConf)
+	}
+
 
 	waitForInevitableHeatDeathOfTheUniverse()
 
