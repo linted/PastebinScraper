@@ -59,7 +59,7 @@ func (d *discordConfig) Set(arg string) error {
 		log.Panicf("Error while reading in config: %s", err)
 	}
 
-	var discordToken, discordChannel = strings.split(strings.TrimSpace(string(discordConfig)), "\n")
+	var discordToken, discordChannel = strings.Split(strings.TrimSpace(string(discordConfig)), "\n")
 
 	if len(discordToken) != 72 {
 		log.Panicf("Invalid discord token length!")
