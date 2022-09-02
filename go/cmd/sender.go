@@ -120,12 +120,12 @@ func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 
 	//set status online
 
-	usd := &UpdateStatusData{
+	usd := &discordgo.UpdateStatusData{
 		Status: "online",
 	}
-	usd.Activities = []*Activity{{
+	usd.Activities = []*discordgo.Activity{{
 		Name: "Pastebin",
-		Type: ActivityTypeWatching,
+		Type: discordgo.ActivityTypeWatching,
 		URL: "https://pastebin.com",
 	}}
 
@@ -150,7 +150,7 @@ func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 
 	}
 
-	usd := &UpdateStatusData{
+	usd = &discordgo.UpdateStatusData{
 		Status: "offline",
 	}
 
