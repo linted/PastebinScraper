@@ -122,12 +122,12 @@ func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 
 	usd := &UpdateStatusData{
 		Status: "online",
-		Activities: []*Activity{{
-			Name: "Pastebin",
-			Type: ActivityTypeWatching,
-			URL: "https://pastebin.com",
-		}}
 	}
+	usd.Activities = []*Activity{{
+		Name: "Pastebin",
+		Type: ActivityTypeWatching,
+		URL: "https://pastebin.com",
+	}}
 
 	err = dg.UpdateStatusComplex(*usd)
 	if err != nil {
