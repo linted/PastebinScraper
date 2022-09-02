@@ -109,7 +109,7 @@ foreverLoop:
 			newListing := new(listings)
 			err = json.Unmarshal(unparsedListing, &newListing)
 			if err != nil {
-				log.Panicf("Error while parsing the json: %s\nurl = %s\ndata = %s", err, scrapePath, unparsedListing)
+				log.Printf("Error while parsing the json: %s\nurl = %s\ndata = %s", err, scrapePath, unparsedListing)
 				continue
 			}
 
