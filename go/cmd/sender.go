@@ -118,8 +118,12 @@ func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 		log.Panicf("Unable to create discord bot: %s", err)
 	}
 
-	//set status online
+	err = dg.Open()
+	if err != nil {
+		log.Panicf("Unable to open websocket: %s", err)
+	}
 
+	//set status online
 	usd := &discordgo.UpdateStatusData{
 		Status: "online",
 	}
@@ -133,6 +137,14 @@ func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 	if err != nil {
 		log.Panicf("Unable to set status! %s", err)
 	}
+
+	usd = &discordgo.UpdateStatusData{
+		Status: "offline",
+	}
+	defer dg.UpdateStatusComplex(*usd)
+	defer dg.Close()
+	defer log.Printf("Stopped Discord bot\n")
+
 
 	for next := range sendQueue {
 		var matchingRules string
@@ -150,16 +162,6 @@ func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 
 	}
 
-	usd = &discordgo.UpdateStatusData{
-		Status: "offline",
-	}
 
-	err = dg.UpdateStatusComplex(*usd)
-	if err != nil {
-		log.Panicf("Unable to set status! %s", err)
-	}
-
-
-	log.Printf("Stopped Discord bot\n")
 	return
 }
