@@ -109,13 +109,6 @@ func postToSlack(sendQueue chan pasteMatch, config slackConfig) {
 	log.Printf("Stopped slackbot\n")
 	return
 }
-// UpdateGameStatus is used to update the user's status.
-// If idle>0 then set status to idle.
-// If name!="" then set game.
-// if otherwise, set status to active, and no activity.
-func (s *Session) UpdateGameStatus(idle int, name string) (err error) {
-	return s.UpdateStatusComplex(*newUpdateStatusData(idle, ActivityTypeGame, name, ""))
-}
 
 func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 	log.Print("Started Discord bot!\n")
