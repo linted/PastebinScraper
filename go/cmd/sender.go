@@ -119,7 +119,17 @@ func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 	}
 
 	//set status online
-	err = dg.UpdateStatusComplex(*newUpdateStatusData(0, ActivityTypeWatching, "Pastebin", "https://pastebin.com"))
+
+	usd := &UpdateStatusData{
+		Status: "online",
+		Activities: []*Activity{{
+			Name: "Pastebin",
+			Type: ActivityTypeWatching,
+			URL: "https://pastebin.com",
+		}}
+	}
+
+	err = dg.UpdateStatusComplex(*usd)
 	if err != nil {
 		log.Panicf("Unable to set status! %s", err)
 	}
@@ -139,6 +149,16 @@ func postToDiscord(sendQueue chan pasteMatch, config discordConfig) {
 		}
 
 	}
+
+	usd := &UpdateStatusData{
+		Status: "offline",
+	}
+
+	err = dg.UpdateStatusComplex(*usd)
+	if err != nil {
+		log.Panicf("Unable to set status! %s", err)
+	}
+
 
 	log.Printf("Stopped Discord bot\n")
 	return
