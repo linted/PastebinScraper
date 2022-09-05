@@ -2,7 +2,7 @@
     These rules attempt to find password leaks / dumps
 */
 
-rule email_list
+rule email_list_low
 {
     meta:
         author = "@KevTheHermit"
@@ -20,7 +20,7 @@ rule email_list
 
 }
 
-rule password_dump
+rule password_dump_low
 {
     meta:
         author = "@linted"
@@ -36,7 +36,7 @@ rule password_dump
 
 
 /*
-rule password_list
+rule password_list_low
 {
     meta:
         author = "@KevTheHermit"
