@@ -124,7 +124,7 @@ foreverLoop:
 			case <-stop:
 				log.Print("Shutting down scrapper!\n")
 				break foreverLoop //get out of this... lovely loop
-			case <-time.After(10000 * time.Millisecond):
+			case <-time.After(30000 * time.Millisecond):
 				continue
 			}
 		}
