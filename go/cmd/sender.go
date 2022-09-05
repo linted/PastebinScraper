@@ -67,9 +67,9 @@ func (d *discordConfig) Set(arg string) error {
 	if len(discordToken) != 72 {
 		log.Panicf("Invalid discord token length!")
 	}
-	if len(discordChannel) != 18 {
-		log.Panicf("Invalid discord channel length!")
-	}
+//	if len(discordChannel) != 18 {
+//		log.Panicf("Invalid discord channel length!")
+//	}
 
 	d.token = discordToken
 	d.channel = discordChannel
