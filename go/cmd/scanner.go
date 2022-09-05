@@ -75,7 +75,6 @@ func compileRules(files rules) *yara.Rules {
 func scanInputs(ruleSet *yara.Rules, inputs chan paste, results chan pasteMatch) {
 	log.Print("Starting to scan inputs\n")
 	for target := range inputs {
-//                log.Printf("[%s] %s\n", target.pasteID, target.title)
 		matches, err := ruleSet.ScanMem(target.contents, 0, 5) //TODO: figure out what the flags do
 		if err != nil {
 			log.Printf("Got error while scanning: %s", err)
