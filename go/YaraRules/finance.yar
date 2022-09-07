@@ -18,7 +18,7 @@ rule chase
     meta:
         author = "@linted"
     strings:
-        $chase = /chase/i
+        $chase = /chase.com/i
     condition:
         any of them
 }
